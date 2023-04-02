@@ -16,7 +16,20 @@ class PhotoPreviewScreen extends StatelessWidget {
         leading: const BackButton(),
       ),
       extendBodyBehindAppBar: true,
-      body: Center(child: Image.memory(GetIt.I<PictureTransporter>().picture)),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Image.memory(GetIt.I<PictureTransporter>().picture),
+          Text(
+            GetIt.I<PictureTransporter>().isPeople
+                ? 'is people'
+                : 'is not people',
+            style: const TextStyle(
+              color: Color(0xffffffff),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
