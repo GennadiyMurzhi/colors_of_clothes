@@ -1,6 +1,4 @@
-import 'package:tflite_flutter/tflite_flutter.dart';
-
-class TensorModel {
+/*class TensorModel {
   Interpreter interpreter;
 
   List<int> inputShape;
@@ -17,3 +15,4 @@ class TensorModel {
     required this.outputType,
   });
 }
+*/
