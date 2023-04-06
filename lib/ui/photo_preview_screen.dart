@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:colors_of_clothes/app/picture_transporter.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -18,17 +20,35 @@ class PhotoPreviewScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30,60,30,0),
-              child: Image.memory(GetIt.I<PictureTransporter>().cameraPicture),
+            const SizedBox(height: 70),
+            _PreviewMemoryImage(GetIt.I<PictureTransporter>().cameraPicture),
+            Text(
+              'camera picture',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            Text('camera picture', style: Theme.of(context).textTheme.titleLarge,),
             const SizedBox(height: 30),
-            Image.memory(GetIt.I<PictureTransporter>().segmentationPicture),
-            Text('segmentation picture', style: Theme.of(context).textTheme.titleLarge,),
+            _PreviewMemoryImage(GetIt.I<PictureTransporter>().segmentationPicture),
+            Text(
+              'segmentation picture',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PreviewMemoryImage extends StatelessWidget {
+  const _PreviewMemoryImage(this.bytes);
+
+  final Uint8List bytes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Image.memory(bytes),
     );
   }
 }

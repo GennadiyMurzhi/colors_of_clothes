@@ -20,8 +20,7 @@ dependencies:
   get_it: 7.2.0
   tflite:
     path: D:/_work/colors_of_clothes/tflite/flutter_tflite-master/flutter_tflite-master
-  #collection: 1.16.0
-  #image: 3.2.2
+  image: 4.0.15
 
   cupertino_icons: ^1.0.2
 
