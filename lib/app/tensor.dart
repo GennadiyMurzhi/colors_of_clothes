@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:colors_of_clothes/domen/determined_color.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:tflite/tflite.dart';
 import 'package:image/image.dart' as img;
 
@@ -20,11 +23,11 @@ class Tensor {
     if (res != null) {
       return res;
     } else {
-      throw ('not load madel');
+      throw ('not load model');
     }
   }
 
-  Future<Uint8List> personIdentification(File image) async {
+  Future<List<DeterminedColor>> personIdentification(File image) async {
     final Uint8List imageBits = image.readAsBytesSync();
     final img.Image? decodedImage = img.decodeImage(imageBits);
     if (decodedImage == null) {
@@ -58,13 +61,45 @@ class Tensor {
     final img.Image personImage = img.Image(
       width: decodedImage.width,
       height: decodedImage.height,
-    )..clear(
-        img.ColorRgb8(255, 255, 255),
-      );
+    )..clear(img.ColorRgb8(255, 255, 255));
     for (img.Pixel pixel in segmentedPixels) {
       personImage.setPixel(pixel.x, pixel.y, pixel.clone());
     }
 
-    return img.encodePng(personImage);
+    final PaletteGenerator palette = await PaletteGenerator.fromImageProvider(
+      MemoryImage(
+        img.encodeJpg(personImage),
+      ),
+    );
+
+    if (kDebugMode) {
+      print('\npalette.colors.length: ${palette.colors.length}');
+      print(
+          '\npalette.selectedSwatches.length: ${palette.selectedSwatches.length}\n ${palette.selectedSwatches}');
+      print('\npalette.paletteColors.length: ${palette.paletteColors.length}');
+    }
+    final List<Color> selectedSwatches = <Color>[];
+
+    for (PaletteTarget swatch in palette.selectedSwatches.keys) {
+      selectedSwatches.add(palette.selectedSwatches[swatch]!.color);
+    }
+
+    List<DeterminedColor> determinedColors = <DeterminedColor>[];
+
+    for (int i = 0; i <= selectedSwatches.length - 1; i++) {
+      final img.Pixel selectedPixel = segmentedPixels.firstWhere(
+          (img.Pixel pixel) =>
+              pixel.r == selectedSwatches[i].red &&
+              pixel.g == selectedSwatches[i].green &&
+              pixel.b == selectedSwatches[i].blue);
+
+      determinedColors.add(DeterminedColor(
+        selectedPixel.x,
+        selectedPixel.y,
+        selectedSwatches[i],
+      ));
+    }
+
+    return determinedColors;
   }
 }

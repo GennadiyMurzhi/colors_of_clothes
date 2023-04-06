@@ -21,6 +21,7 @@ dependencies:
   tflite:
     path: D:/_work/colors_of_clothes/tflite/flutter_tflite-master/flutter_tflite-master
   image: 4.0.15
+  palette_generator: 0.3.3+2
 
   cupertino_icons: ^1.0.2
 
