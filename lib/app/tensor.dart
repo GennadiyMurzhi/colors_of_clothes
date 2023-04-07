@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:colors_of_clothes/domen/determined_color.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,7 +28,7 @@ class Tensor {
     }
   }
 
-  Future<List<DeterminedColor>> personIdentification(File image) async {
+  Future<List<DeterminedPixel>> selectPixels(File image) async {
     final Uint8List imageBits = image.readAsBytesSync();
     final img.Image? decodedImage = img.decodeImage(imageBits);
     if (decodedImage == null) {
@@ -84,22 +85,51 @@ class Tensor {
       selectedSwatches.add(palette.selectedSwatches[swatch]!.color);
     }
 
-    List<DeterminedColor> determinedColors = <DeterminedColor>[];
-
-    for (int i = 0; i <= selectedSwatches.length - 1; i++) {
-      final img.Pixel selectedPixel = segmentedPixels.firstWhere(
-          (img.Pixel pixel) =>
-              pixel.r == selectedSwatches[i].red &&
-              pixel.g == selectedSwatches[i].green &&
-              pixel.b == selectedSwatches[i].blue);
-
-      determinedColors.add(DeterminedColor(
-        selectedPixel.x,
-        selectedPixel.y,
-        selectedSwatches[i],
-      ));
+    List<DeterminedPixel> determinedColors = <DeterminedPixel>[];
+    for (Color swatch in selectedSwatches) {
+      determinedColors.add(
+        _searchSimilarPixel(
+          selectedSwatch: swatch,
+          pixels: segmentedPixels,
+        ),
+      );
     }
 
     return determinedColors;
+  }
+
+  ///https://en.wikipedia.org/wiki/Color_difference
+  DeterminedPixel _searchSimilarPixel({
+    required Color selectedSwatch,
+    required List<img.Pixel> pixels,
+  }) {
+    int distanceMin = double.maxFinite.toInt();
+    int? findIndex;
+
+    for (int i = 0; i <= pixels.length - 1; i++) {
+      final num rPow = pow((selectedSwatch.red - pixels[i].r), 2);
+      final num gPow = pow((selectedSwatch.green - pixels[i].g), 2);
+      final num bPow = pow((selectedSwatch.blue - pixels[i].b), 2);
+      final int distance = sqrt(rPow + gPow + bPow).toInt();
+      if (distance < distanceMin) {
+        distanceMin = distance;
+        findIndex = i;
+      }
+    }
+
+    if (findIndex != null) {
+      return DeterminedPixel(
+        pixels[findIndex].x,
+        pixels[findIndex].y,
+        Color.fromRGBO(
+          pixels[findIndex].r.toInt(),
+          pixels[findIndex].g.toInt(),
+          pixels[findIndex].b.toInt(),
+          1,
+        ),
+      );
+    } else {
+      throw ('error on find similar pixel index');
+    }
   }
 }

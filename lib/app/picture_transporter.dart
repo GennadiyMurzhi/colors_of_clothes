@@ -12,7 +12,7 @@ import 'package:get_it/get_it.dart';
 class PictureTransporter {
   Uint8List? _cameraPicture;
   Uint8List? _segmentationPicture;
-  List<DeterminedColor>? _colors;
+  List<DeterminedPixel>? _colors;
 
   Future<void> setPicture(Future<XFile> pictureFileFuture) async {
     XFile pictureXFile = await pictureFileFuture;
@@ -20,7 +20,7 @@ class PictureTransporter {
     File pictureFile = File(pictureXFile.path);
     _cameraPicture = await pictureFile.readAsBytes();
     //_segmentationPicture =
-    _colors = await GetIt.I<Tensor>().personIdentification(pictureFile);
+    _colors = await GetIt.I<Tensor>().selectPixels(pictureFile);
   }
 
   Uint8List get cameraPicture {
@@ -35,7 +35,7 @@ class PictureTransporter {
         : throw ('no picture set in picture transporter');
   }
 
-  List<DeterminedColor> get colors {
+  List<DeterminedPixel> get colors {
     return _colors != null
         ? _colors!
         : throw ('no picture set in picture transporter');

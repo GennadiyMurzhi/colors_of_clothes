@@ -10,7 +10,7 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<DeterminedColor> colors = GetIt.I<PictureTransporter>().colors;
+    final List<DeterminedPixel> colors = GetIt.I<PictureTransporter>().colors;
 
     final Uint8List bytes = GetIt.I<PictureTransporter>().cameraPicture;
     final Image image = Image.memory(bytes);
