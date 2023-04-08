@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:colors_of_clothes/domen/determined_color.dart';
+import 'package:colors_of_clothes/domen/determined_pixel.dart';
+import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,7 @@ class Tensor {
     }
   }
 
-  Future<List<DeterminedPixel>> selectPixels(File image) async {
+  Future<DeterminedPixels> selectPixels(File image) async {
     final Uint8List imageBits = image.readAsBytesSync();
     final img.Image? decodedImage = img.decodeImage(imageBits);
     if (decodedImage == null) {
@@ -85,9 +86,9 @@ class Tensor {
       selectedSwatches.add(palette.selectedSwatches[swatch]!.color);
     }
 
-    List<DeterminedPixel> determinedColors = <DeterminedPixel>[];
+    List<DeterminedPixel> determinedPixels = <DeterminedPixel>[];
     for (Color swatch in selectedSwatches) {
-      determinedColors.add(
+      determinedPixels.add(
         _searchSimilarPixel(
           selectedSwatch: swatch,
           pixels: segmentedPixels,
@@ -95,7 +96,11 @@ class Tensor {
       );
     }
 
-    return determinedColors;
+    return DeterminedPixels(
+      decodedImage.width,
+      decodedImage.height,
+      determinedPixels,
+    );
   }
 
   ///https://en.wikipedia.org/wiki/Color_difference
@@ -104,7 +109,7 @@ class Tensor {
     required List<img.Pixel> pixels,
   }) {
     int distanceMin = double.maxFinite.toInt();
-    int? findIndex;
+    late int findIndex;
 
     for (int i = 0; i <= pixels.length - 1; i++) {
       final num rPow = pow((selectedSwatch.red - pixels[i].r), 2);
@@ -117,19 +122,15 @@ class Tensor {
       }
     }
 
-    if (findIndex != null) {
-      return DeterminedPixel(
-        pixels[findIndex].x,
-        pixels[findIndex].y,
-        Color.fromRGBO(
-          pixels[findIndex].r.toInt(),
-          pixels[findIndex].g.toInt(),
-          pixels[findIndex].b.toInt(),
-          1,
-        ),
-      );
-    } else {
-      throw ('error on find similar pixel index');
-    }
+    return DeterminedPixel(
+      pixels[findIndex].x,
+      pixels[findIndex].y,
+      Color.fromRGBO(
+        pixels[findIndex].r.toInt(),
+        pixels[findIndex].g.toInt(),
+        pixels[findIndex].b.toInt(),
+        1,
+      ),
+    );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/picture_transporter.dart';
-import 'package:colors_of_clothes/ui/photo_preview_screen.dart';
+import 'package:colors_of_clothes/ui/preview/preview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:colors_of_clothes/main.dart';
 import 'package:get_it/get_it.dart';
@@ -68,7 +68,7 @@ class _CameraScreenState extends State<CameraScreen> {
           context,
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const PhotoPreviewScreen();
+              return const PreviewScreen();
             },
           ),
         );

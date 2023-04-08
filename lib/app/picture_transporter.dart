@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/tensor.dart';
-import 'package:colors_of_clothes/domen/determined_color.dart';
+import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 class PictureTransporter {
   Uint8List? _cameraPicture;
   Uint8List? _segmentationPicture;
-  List<DeterminedPixel>? _colors;
+  DeterminedPixels? _pixels;
 
   Future<void> setPicture(Future<XFile> pictureFileFuture) async {
     XFile pictureXFile = await pictureFileFuture;
@@ -20,7 +19,7 @@ class PictureTransporter {
     File pictureFile = File(pictureXFile.path);
     _cameraPicture = await pictureFile.readAsBytes();
     //_segmentationPicture =
-    _colors = await GetIt.I<Tensor>().selectPixels(pictureFile);
+    _pixels = await GetIt.I<Tensor>().selectPixels(pictureFile);
   }
 
   Uint8List get cameraPicture {
@@ -35,9 +34,9 @@ class PictureTransporter {
         : throw ('no picture set in picture transporter');
   }
 
-  List<DeterminedPixel> get colors {
-    return _colors != null
-        ? _colors!
+  DeterminedPixels get pixels {
+    return _pixels != null
+        ? _pixels!
         : throw ('no picture set in picture transporter');
   }
 }
