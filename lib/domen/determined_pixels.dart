@@ -1,4 +1,4 @@
-import 'package:colors_of_clothes/domen/determined_pixel.dart';
+import 'package:flutter/painting.dart';
 
 class DeterminedPixels {
   DeterminedPixels(
@@ -10,4 +10,16 @@ class DeterminedPixels {
   final int imageWidth;
   final int imageHeight;
   final List<DeterminedPixel> pixelList;
+}
+
+class DeterminedPixel {
+  DeterminedPixel(
+      this.x,
+      this.y,
+      this.color,
+      );
+
+  final int x;
+  final int y;
+  final Color color;
 }

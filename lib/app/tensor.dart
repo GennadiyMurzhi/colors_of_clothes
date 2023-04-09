@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:colors_of_clothes/domen/determined_pixel.dart';
 import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
