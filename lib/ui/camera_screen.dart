@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
-import 'package:colors_of_clothes/app/picture_transporter.dart';
-import 'package:colors_of_clothes/ui/preview/preview_screen.dart';
+import 'package:colors_of_clothes/app/colors_detected_cubit/colors_detected_cubit.dart';
+import 'package:colors_of_clothes/injection.dart';
+import 'package:colors_of_clothes/ui/preview/colors_detected_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:colors_of_clothes/main.dart';
 import 'package:get_it/get_it.dart';
@@ -56,7 +57,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void _takePictureAndOpenPhoto() {
     _isDisabledPhotoButton = true;
 
-    GetIt.I<PictureTransporter>()
+    getIt<ColorsDetectedCubit>()
         .setPicture(controller.takePicture())
         .whenComplete(
       () {
@@ -68,7 +69,7 @@ class _CameraScreenState extends State<CameraScreen> {
           context,
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const PreviewScreen();
+              return const ColorsDetectedScreen();
             },
           ),
         );

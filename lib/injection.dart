@@ -1,9 +1,13 @@
-import 'package:colors_of_clothes/app/picture_transporter.dart';
-import 'package:colors_of_clothes/app/tensor.dart';
 import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
 
-Future<void> injectionSetup() async {
-  GetIt.I.registerLazySingleton<PictureTransporter>(() => PictureTransporter());
+import 'injection.config.dart';
 
-  GetIt.I.registerLazySingleton<Tensor>(() => Tensor()..loadModel());
-}
+final getIt = GetIt.instance;
+
+@InjectableInit(
+  initializerName: 'init', // default
+  preferRelativeImports: true, // default
+  asExtension: true, // default
+)
+void configureDependencies() => getIt.init();

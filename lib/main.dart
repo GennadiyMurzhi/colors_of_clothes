@@ -8,7 +8,7 @@ late List<CameraDescription> cameras;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await injectionSetup();
+  configureDependencies();
 
   cameras = await availableCameras();
   runApp(const ColorsClothesApp());

@@ -7,8 +7,8 @@ class DeterminedPixels {
     this.pixelList,
   );
 
-  final int imageWidth;
-  final int imageHeight;
+  final double imageWidth;
+  final double imageHeight;
   final List<DeterminedPixel> pixelList;
 }
 

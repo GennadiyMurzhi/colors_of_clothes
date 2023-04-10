@@ -5,11 +5,14 @@ import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:injectable/injectable.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:tflite/tflite.dart';
 import 'package:image/image.dart' as img;
 
+@Singleton()
 class Tensor {
+  @PostConstruct(preResolve: true)
   Future<String> loadModel() async {
     String? res = await Tflite.loadModel(
         model: 'assets/model_unquant.tflite',
@@ -96,40 +99,40 @@ class Tensor {
     }
 
     return DeterminedPixels(
-      decodedImage.width,
-      decodedImage.height,
+      decodedImage.width.toDouble(),
+      decodedImage.height.toDouble(),
       determinedPixels,
     );
   }
+}
 
-  ///https://en.wikipedia.org/wiki/Color_difference
-  DeterminedPixel _searchSimilarPixel({
-    required Color selectedSwatch,
-    required List<img.Pixel> pixels,
-  }) {
-    int distanceMin = double.maxFinite.toInt();
-    late int findIndex;
+///https://en.wikipedia.org/wiki/Color_difference
+DeterminedPixel _searchSimilarPixel({
+  required Color selectedSwatch,
+  required List<img.Pixel> pixels,
+}) {
+  int distanceMin = double.maxFinite.toInt();
+  late int findIndex;
 
-    for (int i = 0; i <= pixels.length - 1; i++) {
-      final num rPow = pow((selectedSwatch.red - pixels[i].r), 2);
-      final num gPow = pow((selectedSwatch.green - pixels[i].g), 2);
-      final num bPow = pow((selectedSwatch.blue - pixels[i].b), 2);
-      final int distance = sqrt(rPow + gPow + bPow).toInt();
-      if (distance < distanceMin) {
-        distanceMin = distance;
-        findIndex = i;
-      }
+  for (int i = 0; i <= pixels.length - 1; i++) {
+    final num rPow = pow((selectedSwatch.red - pixels[i].r), 2);
+    final num gPow = pow((selectedSwatch.green - pixels[i].g), 2);
+    final num bPow = pow((selectedSwatch.blue - pixels[i].b), 2);
+    final int distance = sqrt(rPow + gPow + bPow).toInt();
+    if (distance < distanceMin) {
+      distanceMin = distance;
+      findIndex = i;
     }
-
-    return DeterminedPixel(
-      pixels[findIndex].x,
-      pixels[findIndex].y,
-      Color.fromRGBO(
-        pixels[findIndex].r.toInt(),
-        pixels[findIndex].g.toInt(),
-        pixels[findIndex].b.toInt(),
-        1,
-      ),
-    );
   }
+
+  return DeterminedPixel(
+    pixels[findIndex].x,
+    pixels[findIndex].y,
+    Color.fromRGBO(
+      pixels[findIndex].r.toInt(),
+      pixels[findIndex].g.toInt(),
+      pixels[findIndex].b.toInt(),
+      1,
+    ),
+  );
 }
