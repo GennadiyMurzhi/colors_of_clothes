@@ -21,8 +21,7 @@ class Tensor {
         // defaults to 1
         isAsset: true,
         // defaults to true, set to false to load resources outside assets
-        useGpuDelegate:
-            false // defaults to false, set to true to use GPU delegate
+        useGpuDelegate: false // defaults to false, set to true to use GPU delegate
         );
     if (res != null) {
       return res;
@@ -38,8 +37,7 @@ class Tensor {
       throw ('no decode image in the predict segmentation');
     }
 
-    Uint8List? segmentation =
-        await Tflite.runSegmentationOnImage(path: image.path);
+    Uint8List? segmentation = await Tflite.runSegmentationOnImage(path: image.path);
     if (segmentation == null) {
       throw ('no segmentation result');
     }
@@ -78,8 +76,7 @@ class Tensor {
 
     if (kDebugMode) {
       print('\npalette.colors.length: ${palette.colors.length}');
-      print(
-          '\npalette.selectedSwatches.length: ${palette.selectedSwatches.length}\n ${palette.selectedSwatches}');
+      print('\npalette.selectedSwatches.length: ${palette.selectedSwatches.length}\n ${palette.selectedSwatches}');
       print('\npalette.paletteColors.length: ${palette.paletteColors.length}');
     }
     final List<Color> selectedSwatches = <Color>[];

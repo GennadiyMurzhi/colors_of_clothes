@@ -5,19 +5,23 @@ import 'package:flutter/painting.dart';
 List<CompatibleColors> computeCompatibleColor(List<Color> determinedColors) {
   final List<CompatibleColors> compatibleColors = <CompatibleColors>[];
   for (Color checkColor in determinedColors) {
-    final Map<Color, Harmony> compatible = <Color, Harmony>{};
+    final List<CompatibleColor> compatibleColorList = <CompatibleColor>[];
     for (Color targetColor in determinedColors) {
-      compatible.addAll(
-        {
-          targetColor: _getColorHarmony(checkColor, targetColor),
-        },
-      );
+      if (checkColor != targetColor) {
+        compatibleColorList.add(
+          CompatibleColor(
+            targetColor,
+            _getColorHarmony(checkColor, targetColor),
+          ),
+        );
+      }
     }
+
     compatibleColors.add(
       CompatibleColors(
         checkColor,
-        _checkCompatible(compatible),
-        compatible,
+        _checkCompatible(compatibleColorList),
+        compatibleColorList,
       ),
     );
   }
@@ -44,9 +48,9 @@ Harmony _getColorHarmony(Color color1, Color color2) {
   }
 }
 
-bool _checkCompatible(Map<Color, Harmony> compatible) {
-  for (Harmony harmony in compatible.values) {
-    if (harmony != Harmony.none) {
+bool _checkCompatible(List<CompatibleColor> compatibleColorList) {
+  for (CompatibleColor compatibleColor in compatibleColorList) {
+    if (compatibleColor.harmony != Harmony.none) {
       return true;
     }
   }

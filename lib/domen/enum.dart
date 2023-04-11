@@ -1,4 +1,4 @@
-enum Harmony{
+enum Harmony {
   analogous,
   complementary,
   splitComplementary,

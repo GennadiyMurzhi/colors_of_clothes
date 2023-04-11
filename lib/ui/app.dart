@@ -15,5 +15,3 @@ class ColorsClothesApp extends StatelessWidget {
     );
   }
 }
-
-

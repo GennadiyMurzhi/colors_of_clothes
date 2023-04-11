@@ -29,8 +29,8 @@ class ColorsDetectedCubit extends Cubit<ColorsDetectedState> {
 
     final Uint8List cameraImage = await pictureFile.readAsBytes();
     final DeterminedPixels pixels = await _tensor.selectPixels(pictureFile);
-    final List<CompatibleColors> compatibleDeterminedColors =
-        computeCompatibleColor(determinedPixelToColors(pixels));
+    final CompatibleColorsList compatibleDeterminedColors =
+        CompatibleColorsList.fromDeterminedColors(pixels.determinedColors);
 
     emit(
       state.copyWith(
