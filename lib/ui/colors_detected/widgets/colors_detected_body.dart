@@ -16,55 +16,52 @@ class ColorsDetectedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: BlocProvider<ColorsDetectedCubit>(
-        create: (context) => getIt<ColorsDetectedCubit>(),
-        child: BlocBuilder<ColorsDetectedCubit, ColorsDetectedState>(
-          builder: (BuildContext context, ColorsDetectedState state) {
-            _checkState(state.cameraImage, state.pixels, state.compatibleDeterminedColors);
+      child: BlocBuilder<ColorsDetectedCubit, ColorsDetectedState>(
+        builder: (BuildContext context, ColorsDetectedState state) {
+          _checkState(state.cameraImage, state.pixels, state.compatibleDeterminedColors);
 
-            final DeterminedPixels pixels = state.pixels!;
-            final List<CompatibleColors> compatibleDeterminedColors = state.compatibleDeterminedColors!.list;
+          final DeterminedPixels pixels = state.pixels!;
+          final List<CompatibleColors> compatibleDeterminedColors = state.compatibleDeterminedColors!.list;
 
-            final double colorContainerSize = MediaQuery.of(context).size.width / pixels.pixelList.length - 10;
-            final double colorRowSymmetricPadding =
-                (MediaQuery.of(context).size.width - colorContainerSize * pixels.pixelList.length) /
-                    pixels.pixelList.length;
+          final double colorContainerSize = MediaQuery.of(context).size.width / pixels.pixelList.length - 10;
+          final double colorRowSymmetricPadding =
+              (MediaQuery.of(context).size.width - colorContainerSize * pixels.pixelList.length) /
+                  pixels.pixelList.length;
 
-            final int? selectedPixelIndex = state.selectedPixelIndex;
-            final void Function(int indexPixel) selectPixel = BlocProvider.of<ColorsDetectedCubit>(context).selectPixel;
+          final int? selectedPixelIndex = state.selectedPixelIndex;
+          final void Function(int indexPixel) selectPixel = BlocProvider.of<ColorsDetectedCubit>(context).selectPixel;
 
-            return Column(
-              children: <Widget>[
-                const SizedBox(height: 70),
-                PhotoColorsWidget(
-                  image: state.cameraImage!,
-                  imageWidth: pixels.imageWidth,
-                  imageHeight: pixels.imageHeight,
-                  pixelList: pixels.pixelList,
-                  selectedPixelIndex: state.selectedPixelIndex,
-                  selectPixel: selectPixel,
+          return Column(
+            children: <Widget>[
+              const SizedBox(height: 70),
+              PhotoColorsWidget(
+                image: state.cameraImage!,
+                imageWidth: pixels.imageWidth,
+                imageHeight: pixels.imageHeight,
+                pixelList: pixels.pixelList,
+                selectedPixelIndex: state.selectedPixelIndex,
+                selectPixel: selectPixel,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'Determined Colors',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Text(
-                    'Determined Colors',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                DeterminedColorsWidget(
-                  colorRowSymmetricPadding: colorRowSymmetricPadding,
-                  colorContainerSize: colorContainerSize,
-                  compatibleDeterminedColors: compatibleDeterminedColors,
-                  selectedPixelIndex: state.selectedPixelIndex,
-                  selectPixel: selectPixel,
-                ),
-                CompatibleColorsWidget(
-                  compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
-                ),
-              ],
-            );
-          },
-        ),
+              ),
+              DeterminedColorsWidget(
+                colorRowSymmetricPadding: colorRowSymmetricPadding,
+                colorContainerSize: colorContainerSize,
+                compatibleDeterminedColors: compatibleDeterminedColors,
+                selectedPixelIndex: state.selectedPixelIndex,
+                selectPixel: selectPixel,
+              ),
+              CompatibleColorsWidget(
+                compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
