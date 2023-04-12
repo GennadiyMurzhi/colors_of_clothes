@@ -11,70 +11,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ColorsDetectedBody extends StatelessWidget {
-  const ColorsDetectedBody({super.key});
+  const ColorsDetectedBody({
+    super.key,
+    required this.image,
+    required this.pixels,
+    required this.compatibleDeterminedColors,
+  });
+
+  final Uint8List image;
+  final DeterminedPixels pixels;
+  final List<CompatibleColors> compatibleDeterminedColors;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    final double colorContainerSize = MediaQuery.of(context).size.width / pixels.pixelList.length - 10;
+    final double colorRowSymmetricPadding =
+        (MediaQuery.of(context).size.width - colorContainerSize * pixels.pixelList.length) / pixels.pixelList.length;
+
+    return BlocProvider(
+      create: (BuildContext context) => getIt<ColorsDetectedCubit>(),
       child: BlocBuilder<ColorsDetectedCubit, ColorsDetectedState>(
         builder: (BuildContext context, ColorsDetectedState state) {
-          _checkState(state.cameraImage, state.pixels, state.compatibleDeterminedColors);
-
-          final DeterminedPixels pixels = state.pixels!;
-          final List<CompatibleColors> compatibleDeterminedColors = state.compatibleDeterminedColors!.list;
-
-          final double colorContainerSize = MediaQuery.of(context).size.width / pixels.pixelList.length - 10;
-          final double colorRowSymmetricPadding =
-              (MediaQuery.of(context).size.width - colorContainerSize * pixels.pixelList.length) /
-                  pixels.pixelList.length;
-
           final int? selectedPixelIndex = state.selectedPixelIndex;
           final void Function(int indexPixel) selectPixel = BlocProvider.of<ColorsDetectedCubit>(context).selectPixel;
 
-          return Column(
-            children: <Widget>[
-              const SizedBox(height: 70),
-              PhotoColorsWidget(
-                image: state.cameraImage!,
-                imageWidth: pixels.imageWidth,
-                imageHeight: pixels.imageHeight,
-                pixelList: pixels.pixelList,
-                selectedPixelIndex: state.selectedPixelIndex,
-                selectPixel: selectPixel,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                child: Text(
-                  'Determined Colors',
-                  style: Theme.of(context).textTheme.titleLarge,
+          return SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 70),
+                PhotoColorsWidget(
+                  image: image,
+                  imageWidth: pixels.imageWidth,
+                  imageHeight: pixels.imageHeight,
+                  pixelList: pixels.pixelList,
+                  selectedPixelIndex: selectedPixelIndex,
+                  selectPixel: selectPixel,
                 ),
-              ),
-              DeterminedColorsWidget(
-                colorRowSymmetricPadding: colorRowSymmetricPadding,
-                colorContainerSize: colorContainerSize,
-                compatibleDeterminedColors: compatibleDeterminedColors,
-                selectedPixelIndex: state.selectedPixelIndex,
-                selectPixel: selectPixel,
-              ),
-              CompatibleColorsWidget(
-                compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: Text(
+                    'Determined Colors',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                DeterminedColorsWidget(
+                  colorRowSymmetricPadding: colorRowSymmetricPadding,
+                  colorContainerSize: colorContainerSize,
+                  compatibleDeterminedColors: compatibleDeterminedColors,
+                  selectedPixelIndex: selectedPixelIndex,
+                  selectPixel: selectPixel,
+                ),
+                CompatibleColorsWidget(
+                  compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
+                ),
+              ],
+            ),
           );
         },
       ),
     );
-  }
-}
-
-void _checkState(Uint8List? cameraImage, DeterminedPixels? pixels, CompatibleColorsList? compatibleDeterminedColors) {
-  if (cameraImage == null) {
-    throw ('cameraImage is not set in the colors detected state');
-  }
-  if (pixels == null) {
-    throw ('pixels is not set in the colors detected state');
-  }
-  if (compatibleDeterminedColors == null) {
-    throw ('compatibleDeterminedColors is not set in the colors detected state');
   }
 }

@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/colors_detected_cubit/colors_detected_cubit.dart';
+import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
 import 'package:flutter/material.dart';
@@ -53,24 +54,19 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
-  void _takePictureAndOpenPhoto() {
+  void _takePictureAndOpenPhoto(XFile pictureXFile) {
     _isDisabledPhotoButton = true;
+    controller.pausePreview();
 
-    getIt<ColorsDetectedCubit>().setPicture(controller.takePicture()).whenComplete(
-      () {
-        _isDisabledPhotoButton = false;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          getIt<TensorCubit>().setPicture(pictureXFile);
 
-        controller.pausePreview();
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const ColorsDetectedScreen();
-            },
-          ),
-        );
-      },
+          return const ColorsDetectedScreen();
+        },
+      ),
     );
   }
 
@@ -86,8 +82,6 @@ class _CameraScreenState extends State<CameraScreen> {
         elevation: 0,
         leading: const BackButton(),
       ),
-      //extendBody: true,
-      //extendBodyBehindAppBar: true,
       body: Stack(
         children: <Widget>[
           AspectRatio(
@@ -103,12 +97,15 @@ class _CameraScreenState extends State<CameraScreen> {
                 customBorder: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),
                 ),
-                onTap: () {
-                  _isDisabledPhotoButton ? null : _takePictureAndOpenPhoto();
+                onTap: () async {
+                  if (!_isDisabledPhotoButton) {
+                    XFile pictureXFile = await controller.takePicture();
+                    _takePictureAndOpenPhoto(pictureXFile);
+                  }
                 },
                 child: const Icon(
                   Icons.circle_outlined,
-                  color: Colors.black54,
+                  color: Colors.white70,
                   size: 80,
                 ),
               ),

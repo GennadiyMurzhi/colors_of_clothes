@@ -1,4 +1,5 @@
 import 'package:colors_of_clothes/app/colors_detected_cubit/colors_detected_cubit.dart';
+import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/home/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,8 @@ class ColorsClothesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ColorsDetectedCubit>(
-      create: (context) => getIt<ColorsDetectedCubit>(),
+    return BlocProvider<TensorCubit>(
+      create: (BuildContext context) => getIt<TensorCubit>(),
       child: MaterialApp(
         title: 'Colors of Clothes',
         theme: ThemeData(
