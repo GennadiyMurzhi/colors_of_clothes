@@ -20,10 +20,6 @@ class TensorCubit extends Cubit<TensorState> {
   final Tensor _tensor;
 
   Future<void> setPicture(XFile pictureXFile) async {
-    emit(
-      state.copyWith(colorDetermination: true),
-    );
-
     final File pictureFile = File(pictureXFile.path);
 
     final Uint8List cameraImage = await pictureFile.readAsBytes();
