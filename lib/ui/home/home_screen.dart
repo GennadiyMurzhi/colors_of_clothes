@@ -1,4 +1,4 @@
-import 'package:colors_of_clothes/ui/camera_screen.dart';
+import 'package:colors_of_clothes/ui/camera/camera_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
