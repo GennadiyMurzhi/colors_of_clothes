@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 bool isSelectedPixel(int index, int? selectedPixelIndex) {
@@ -10,16 +8,23 @@ bool isSelectedPixel(int index, int? selectedPixelIndex) {
   }
 }
 
-Matrix4 createSwitchButtonMatrix(double animationIndex, double translate) => Matrix4.identity()
-  ..setEntry(0, 0, 1 - 1 * animationIndex)
-  ..setEntry(0, 3, translate * animationIndex);
+Matrix4 createSwitchButtonMatrix(double animationIndex, double translate) => Matrix4.rotationY(3.14 * animationIndex);
 
-Matrix4 createSwitchPreviewMatrix(double animationIndex, double translate) => Matrix4.identity()
-  ..setEntry(0, 0, 1 - 1.1 * animationIndex)
-  ..setEntry(0, 3, translate * animationIndex)
+Matrix4 createSwitchPreviewMatrix(double animationIndex) {
+  final double tilt = ((animationIndex - 0.5).abs() - 0.5) * 0.003;
 
-  ..setEntry(3, 0, -0.0005 * animationIndex)
+  final Matrix4 matrix = Matrix4.rotationY(3.14 * (1 - animationIndex))..setEntry(3, 0, tilt / 2);
 
-  ..rotateX(3.14/12 * animationIndex)
-  ..rotateY(3.14/12 * animationIndex)
- ;
+  return matrix;
+}
+
+Matrix4 createSwitchCaptureMatrix(double animationIndex) {
+  final Matrix4 matrix;
+  if (animationIndex < 0.5) {
+    matrix = Matrix4.rotationY(3.14);
+  } else {
+    matrix = Matrix4.identity();
+  }
+
+  return matrix;
+}

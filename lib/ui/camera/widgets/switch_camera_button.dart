@@ -18,6 +18,7 @@ class SwitchCameraButton extends StatelessWidget {
       onTap: onTap,
       child: Transform(
         transform: animationMatrix,
+        alignment: Alignment.center,
         child: Icon(
           isNotSwitched ? Icons.cameraswitch_outlined : Icons.camera_front,
           color: Colors.white,
