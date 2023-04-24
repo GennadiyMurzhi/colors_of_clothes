@@ -35,36 +35,39 @@ class ColorsDetectedBody extends StatelessWidget {
           final int? selectedPixelIndex = state.selectedPixelIndex;
           final void Function(int indexPixel) selectPixel = BlocProvider.of<ColorsDetectedCubit>(context).selectPixel;
 
-          return SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                const SizedBox(height: 70),
-                PhotoColorsWidget(
-                  image: image,
-                  imageWidth: pixels.imageWidth,
-                  imageHeight: pixels.imageHeight,
-                  pixelList: pixels.pixelList,
-                  selectedPixelIndex: selectedPixelIndex,
-                  selectPixel: selectPixel,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Text(
-                    'Determined Colors',
-                    style: Theme.of(context).textTheme.titleLarge,
+          return SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(height: 70),
+                  PhotoColorsWidget(
+                    image: image,
+                    imageWidth: pixels.imageWidth,
+                    imageHeight: pixels.imageHeight,
+                    pixelList: pixels.pixelList,
+                    selectedPixelIndex: selectedPixelIndex,
+                    selectPixel: selectPixel,
                   ),
-                ),
-                DeterminedColorsWidget(
-                  colorRowSymmetricPadding: colorRowSymmetricPadding,
-                  colorContainerSize: colorContainerSize,
-                  compatibleDeterminedColors: compatibleDeterminedColors,
-                  selectedPixelIndex: selectedPixelIndex,
-                  selectPixel: selectPixel,
-                ),
-                CompatibleColorsWidget(
-                  compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      'Determined Colors',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  DeterminedColorsWidget(
+                    colorRowSymmetricPadding: colorRowSymmetricPadding,
+                    colorContainerSize: colorContainerSize,
+                    compatibleDeterminedColors: compatibleDeterminedColors,
+                    selectedPixelIndex: selectedPixelIndex,
+                    selectPixel: selectPixel,
+                  ),
+                  CompatibleColorsWidget(
+                    compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
+                  ),
+                ],
+              ),
             ),
           );
         },

@@ -6,7 +6,10 @@ class ColorsDetectedState with _$ColorsDetectedState {
     required int? selectedPixelIndex,
   }) = _ColorsDetectedState;
 
-  factory ColorsDetectedState.initial() => ColorsDetectedState(
+  factory ColorsDetectedState.initial() => const ColorsDetectedState(
         selectedPixelIndex: null,
       );
 }
+
+
+

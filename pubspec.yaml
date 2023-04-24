@@ -6,27 +6,21 @@ version: 1.0.0+1
 environment:
   sdk: '>=2.19.6 <3.0.0'
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
     sdk: flutter
 
-  camera: 0.10.3+2
+  camera: 0.10.4
   tflite:
     path: D:/_work/colors_of_clothes/tflite/flutter_tflite-master/flutter_tflite-master
   get_it: 7.2.0
-  injectable: 2.1.1
+  native_device_orientation: ^1.1.4
   image: 4.0.15
   palette_generator: 0.3.3+2
   flutter_bloc: 8.1.2
   freezed: 2.3.2
   freezed_annotation: 2.2.0
-
+  injectable: 2.1.1
 
   cupertino_icons: ^1.0.2
 

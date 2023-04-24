@@ -1,4 +1,3 @@
-import 'package:colors_of_clothes/app/colors_detected_cubit/colors_detected_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/home/home_screen.dart';

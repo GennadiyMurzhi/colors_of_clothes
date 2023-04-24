@@ -1,21 +1,15 @@
-import 'dart:math' as math;
-import 'dart:ui' as ui;
-
 import 'package:camera/camera.dart';
+import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
-import 'package:colors_of_clothes/domen/ui_helpers.dart';
 import 'package:colors_of_clothes/injection.dart';
-import 'package:colors_of_clothes/ui/camera/widgets/camera_button.dart';
-import 'package:colors_of_clothes/ui/camera/widgets/flash_button.dart';
-import 'package:colors_of_clothes/ui/camera/widgets/switch_camera_button.dart';
+import 'package:colors_of_clothes/ui/camera/widgets/camera_body.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
+import 'package:colors_of_clothes/domen/system.dart';
+import 'package:colors_of_clothes/ui/global.dart';
 import 'package:flutter/material.dart';
-import 'package:colors_of_clothes/main.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:screenshot/screenshot.dart';
-
-final GlobalKey _previewRepaintBoundaryKey = GlobalKey();
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({
@@ -27,59 +21,89 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
-  late CameraController controller;
-  bool controllerIsInitialized = false;
+  late CameraController cameraController;
   late AnimationController flashButtonAnimationController;
   late AnimationController cameraButtonAnimationController;
   late AnimationController switchAnimationController;
-  bool _isEnabledPhotoButton = true;
-  bool _isEnabledFlashButton = true;
-  bool _isEnabledSwitchButton = true;
-  bool _isCameraNotSwitched = true;
-  bool _needBlur = false;
-  final List<IconData> flashIconList = <IconData>[];
-  Uint8List? _capturePreview;
+  late AnimationController orientationAnimationController;
+  bool controllerIsInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    setSystemUIToEdge();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
 
     WidgetsBinding.instance.addObserver(this);
 
-    controller = _createController(cameras[0]);
+    cameraController = createController(cameras[0]);
 
-    controller.initialize().then((value) {
-      if (!mounted) {
-        return;
-      }
+    cameraController.initialize().then(
+      (value) {
+        controllerIsInitialized = true;
 
-      controllerIsInitialized = true;
-
-      setState(() {});
-    });
+        setState(() {});
+      },
+    );
 
     flashButtonAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 300),
     );
 
     cameraButtonAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 200),
     );
 
     switchAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 500),
+    );
+
+    orientationAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    NativeDeviceOrientationCommunicator().onOrientationChanged(useSensor: true).listen(
+      (NativeDeviceOrientation event) {
+        switch (event) {
+          case NativeDeviceOrientation.portraitDown:
+            break;
+          case NativeDeviceOrientation.unknown:
+            break;
+          case NativeDeviceOrientation.portraitUp:
+            if (orientationAnimationController.value != 0.5) {
+              orientationAnimationController.animateTo(0.5, curve: Curves.easeIn);
+            }
+            break;
+          case NativeDeviceOrientation.landscapeLeft:
+            if (orientationAnimationController.value != 1) {
+              orientationAnimationController.animateTo(1, curve: Curves.easeIn);
+            }
+            break;
+          case NativeDeviceOrientation.landscapeRight:
+            if (orientationAnimationController.value != 0) {
+              orientationAnimationController.animateBack(0, curve: Curves.easeIn);
+            }
+            break;
+        }
+      },
     );
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    cameraController.dispose();
     flashButtonAnimationController.dispose();
+    cameraButtonAnimationController.dispose();
+    switchAnimationController.dispose();
+    orientationAnimationController.dispose();
 
     WidgetsBinding.instance.removeObserver(this);
 
@@ -95,26 +119,24 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     }
   }
 
-  CameraController _createController(CameraDescription cameraDescription) => CameraController(
-        cameraDescription,
-        ResolutionPreset.max,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
+  void backButtonOnPressed() {
+    setSystemUI();
 
-  //camera button
+    setDefaultOrientation();
 
-  void _takePictureAndOpenPhoto(XFile pictureXFile) {
-    _isEnabledPhotoButton = false;
-    controller.pausePreview();
+    Navigator.of(context).pop();
+  }
 
+  void pushColorsDetected(XFile pictureXFile) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) {
           getIt<TensorCubit>().setPicture(pictureXFile);
 
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          setSystemUI();
+
+          setDefaultOrientation();
 
           return const ColorsDetectedScreen();
         },
@@ -122,119 +144,26 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     );
   }
 
-  Future<void> _cameraButtonOnTap() async {
-    if (_isEnabledPhotoButton) {
-      cameraButtonAnimationController.animateTo(0.5);
-
-      XFile pictureXFile = await controller.takePicture();
-      await cameraButtonAnimationController.animateTo(0);
-
-      _takePictureAndOpenPhoto(pictureXFile);
+  Future<void> precacheCapturePreview(Uint8List capturePreview) async {
+    if (context.mounted) {
+      await precacheImage(MemoryImage(capturePreview), context);
     }
   }
 
-  void _cameraButtonOnLongPressStart(LongPressStartDetails details) {
-    cameraButtonAnimationController.animateTo(0.5);
-  }
-
-  Future<void> _cameraButtonOnLongPressEnd(LongPressEndDetails details) async {
-    XFile pictureXFile = await controller.takePicture();
-    await cameraButtonAnimationController.animateTo(0);
-    _takePictureAndOpenPhoto(pictureXFile);
-  }
-
-  void _cameraButtonOnLongPressCancel() {
-    cameraButtonAnimationController.animateTo(0);
-  }
-
-  //flash button
-  Future<void> _setFlashModeAndIcon() async {
-    _isEnabledFlashButton = false;
-
-    switch (controller.value.flashMode) {
-      case FlashMode.off:
-        flashIconList.add(Icons.flash_auto);
-        await controller.setFlashMode(FlashMode.auto);
-        break;
-      case FlashMode.auto:
-        flashIconList.add(Icons.flash_on);
-        await controller.setFlashMode(FlashMode.always);
-        break;
-      case FlashMode.always:
-        flashIconList.add(Icons.flashlight_on);
-        await controller.setFlashMode(FlashMode.torch);
-        break;
-      case FlashMode.torch:
-        flashIconList.add(Icons.flash_off);
-        await controller.setFlashMode(FlashMode.off);
-        break;
-      default:
-        flashIconList.add(Icons.flash_off);
-        await controller.setFlashMode(FlashMode.off);
-    }
-
-    setState(() {});
-
-    await flashButtonAnimationController.animateTo(
-      1,
-      curve: Curves.easeInOutCubic,
-    );
-    flashIconList.removeAt(0);
-    flashButtonAnimationController.reset();
-
-    _isEnabledFlashButton = true;
-  }
-
-  void _setFlashIconOnStart() {
-    if (flashIconList.isEmpty) {
-      switch (controller.value.flashMode) {
-        case FlashMode.off:
-          flashIconList.add(Icons.flash_off);
-          break;
-        case FlashMode.auto:
-          flashIconList.add(Icons.flash_auto);
-          break;
-        case FlashMode.always:
-          flashIconList.add(Icons.flash_on);
-          break;
-        case FlashMode.torch:
-          flashIconList.add(Icons.flashlight_on);
-          break;
-        default:
-          flashIconList.add(Icons.flash_off);
-      }
-    }
-  }
-
-  //switch button
-  Future<void> _switchCamera(CameraDescription cameraDescription) async {
-    controllerIsInitialized = false;
-
-    await controller.dispose();
-
-    controller = _createController(cameraDescription);
-
-    try {
-      await controller.initialize();
-    } on CameraException catch (e) {
-      throw ('Error initializing camera: $e');
-    }
-
-    controllerIsInitialized = controller.value.isInitialized;
-  }
-
-  Future<Uint8List> _createCapturePreview() async {
-    RenderRepaintBoundary boundary =
-        _previewRepaintBoundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage();
-    ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-
-    return bytes!.buffer.asUint8List();
+  void setCameraControllerAndIsInitialized(CameraController cameraController, bool isInitialized) {
+    this.cameraController = cameraController;
+    controllerIsInitialized = isInitialized;
   }
 
   @override
   Widget build(BuildContext context) {
-    _setFlashIconOnStart();
+    if (!cameraController.value.isInitialized) {
+      return Container();
+    }
+
+    final Size previewSize = cameraController.value.previewSize!;
+    final double previewHeight = MediaQuery.of(context).size.height;
+    final double previewWidth = previewHeight * previewSize.height / previewSize.width;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -244,116 +173,34 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(
-          onPressed: () {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-            Navigator.of(context).pop();
-          },
+          onPressed: backButtonOnPressed,
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          SizedBox.fromSize(size: MediaQuery.of(context).size),
-          !_isEnabledSwitchButton
-              ? AnimatedBuilder(
-                  animation: switchAnimationController,
-                  builder: (BuildContext context, Widget? widget) {
-                    return Transform(
-                      transform: createSwitchPreviewMatrix(switchAnimationController.value),
-                      alignment: Alignment.center,
-                      child: Transform(
-                        transform: createSwitchCaptureMatrix(switchAnimationController.value),
-                        alignment: Alignment.center,
-                        child: Image(
-                          image: MemoryImage(_capturePreview!),
-                        ),
-                      ),
-                    );
-                  },
-                )
-              : controllerIsInitialized
-                  ? RepaintBoundary(
-                      key: _previewRepaintBoundaryKey,
-                      child: CameraPreview(controller),
-                    )
-                  : const SizedBox(),
-          Positioned(
-            bottom: 30,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  _isCameraNotSwitched
-                      ? AnimatedBuilder(
-                          animation: flashButtonAnimationController,
-                          builder: (BuildContext context, Widget? widget) {
-                            return FlashButton(
-                              currentFlashMode: controller.value.flashMode,
-                              setFlashMode: _isEnabledFlashButton ? _setFlashModeAndIcon : null,
-                              positionedTop:
-                                  flashIconList.length == 1 ? 0 : -45 + flashButtonAnimationController.value * 45,
-                              iconList: flashIconList,
-                              opacity: flashButtonAnimationController.value,
-                            );
-                          },
-                        )
-                      : const SizedBox(width: 35),
-                  AnimatedBuilder(
-                      animation: cameraButtonAnimationController,
-                      builder: (BuildContext context, Widget? widget) {
-                        return CameraButton(
-                          onTap: _cameraButtonOnTap,
-                          onLongPressStart: _cameraButtonOnLongPressStart,
-                          onLongPressEnd: _cameraButtonOnLongPressEnd,
-                          onLongPressCancel: _cameraButtonOnLongPressCancel,
-                          innerCameraSize: 80 * (1 - cameraButtonAnimationController.value),
-                          innerCameraAngle: math.pi * cameraButtonAnimationController.value,
-                        );
-                      }),
-                  AnimatedBuilder(
-                    animation: switchAnimationController,
-                    builder: (BuildContext context, Widget? widget) {
-                      return SwitchCameraButton(
-                        onTap: () async {
-                          _capturePreview = await _createCapturePreview();
-
-                          if (context.mounted) {
-                            await precacheImage(MemoryImage(_capturePreview!), context);
-                          }
-
-                          setState(() {
-                            _isEnabledSwitchButton = false;
-                          });
-
-                          await switchAnimationController.animateTo(1);
-                          setState(() {
-                            _isCameraNotSwitched = !_isCameraNotSwitched;
-                          });
-                          if (_isCameraNotSwitched) {
-                            await _switchCamera(cameras[0]);
-                          } else {
-                            await _switchCamera(cameras[1]);
-                          }
-
-                          switchAnimationController.reset();
-
-                          setState(() {
-                            _isEnabledSwitchButton = true;
-                          });
-
-                          _capturePreview = null;
-                        },
-                        animationMatrix: createSwitchButtonMatrix(switchAnimationController.value, 17.5),
-                        isNotSwitched: _isCameraNotSwitched,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: BlocProvider<CameraCubit>(
+        create: (context) => getIt<CameraCubit>()..setFlashIconOnInit(cameraController.value.flashMode),
+        child: BlocBuilder<CameraCubit, CameraState>(
+          builder: (BuildContext context, CameraState state) {
+            return CameraBody(
+              previewWidth: previewWidth,
+              previewHeight: previewHeight,
+              isEnabledSwitchButton: state.isEnabledSwitchButton,
+              controllerIsInitialized: controllerIsInitialized,
+              switchAnimationController: switchAnimationController,
+              capturePreview: state.capturePreview,
+              cameraController: cameraController,
+              orientationAnimationController: orientationAnimationController,
+              isCameraNotSwitched: state.isCameraNotSwitched,
+              flashButtonAnimationController: flashButtonAnimationController,
+              cameraButtonAnimationController: cameraButtonAnimationController,
+              flashIconList: state.flashIconList,
+              isEnabledFlashButton: state.isEnabledFlashButton,
+              pushColorsDetected: pushColorsDetected,
+              isSwitchButtonRotated: state.isSwitchButtonRotated,
+              precacheCapturePreview: precacheCapturePreview,
+              setCameraControllerAndIsInitialized: setCameraControllerAndIsInitialized,
+            );
+          },
+        ),
       ),
     );
   }

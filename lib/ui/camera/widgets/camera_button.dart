@@ -1,52 +1,53 @@
+import 'dart:math';
+
+import 'package:colors_of_clothes/domen/ui_helpers.dart';
 import 'package:flutter/material.dart';
 
 class CameraButton extends StatelessWidget {
   const CameraButton({
     super.key,
+    required this.cameraButtonAnimationController,
+    required this.orientationAnimationValue,
     required this.onTap,
-    required this.onLongPressStart,
-    required this.onLongPressEnd,
-    required this.onLongPressCancel,
-    required this.innerCameraSize,
-    required this.innerCameraAngle,
   });
 
+  final AnimationController cameraButtonAnimationController;
+  final double orientationAnimationValue;
   final void Function() onTap;
-  final void Function(LongPressStartDetails) onLongPressStart;
-  final void Function(LongPressEndDetails) onLongPressEnd;
-  final void Function() onLongPressCancel;
-  final double innerCameraSize;
-  final double innerCameraAngle;
 
   @override
   Widget build(BuildContext context) {
+    final double cameraButtonAnimationValue = cameraButtonAnimationController.value;
+
     return GestureDetector(
       onTap: onTap,
-      onLongPressStart: onLongPressStart,
-      onLongPressEnd: onLongPressEnd,
-      onLongPressCancel: onLongPressCancel,
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: <Widget>[
-          Container(
-            width: 80,
-            height: 80,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(
-                width: 3,
-                color: Colors.white,
-              ),
-            ),
+          AnimatedBuilder(
+            animation: cameraButtonAnimationController,
+            builder: (BuildContext context, Widget? widget) {
+              return Container(
+                width: 80,
+                height: 80,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    width: 3,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
           ),
           Transform.rotate(
-            angle: innerCameraAngle,
+            angle: pi * cameraButtonAnimationValue + orientationAngle(orientationAnimationValue),
             child: Icon(
               Icons.camera,
               color: Colors.white,
-              size: innerCameraSize,
+              size: 80 * (1 - cameraButtonAnimationValue),
             ),
           ),
         ],
