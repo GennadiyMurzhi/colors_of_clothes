@@ -21,12 +21,6 @@ class FlashButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final double flashButtonAnimationValue = flashButtonAnimationController.value;
 
-    print('Flash Button');
-    print(setFlashMode);
-    print(iconList);
-    print(flashButtonAnimationController.value);
-    print(orientationAnimationValue);
-
     return InkWell(
       onTap: () async {
         if (setFlashMode != null) {

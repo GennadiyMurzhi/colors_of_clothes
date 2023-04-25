@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
-import 'package:colors_of_clothes/ui/global.dart';
+import 'package:colors_of_clothes/app/global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

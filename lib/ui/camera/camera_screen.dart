@@ -5,7 +5,8 @@ import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_body.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
 import 'package:colors_of_clothes/domen/system.dart';
-import 'package:colors_of_clothes/ui/global.dart';
+import 'package:colors_of_clothes/app/global.dart';
+import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,7 +69,9 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     orientationAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
-    );
+    )..value = 0.5;
+
+    NativeDeviceOrientationCommunicator().resume();
 
     NativeDeviceOrientationCommunicator().onOrientationChanged(useSensor: true).listen(
       (NativeDeviceOrientation event) {
@@ -107,6 +110,8 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
 
     WidgetsBinding.instance.removeObserver(this);
 
+    NativeDeviceOrientationCommunicator().pause();
+
     super.dispose();
   }
 
@@ -127,20 +132,16 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     Navigator.of(context).pop();
   }
 
-  void pushColorsDetected(XFile pictureXFile) {
+  void pushColorsDetected(XFile imageXFile) {
+    setSystemUI();
+
+    setDefaultOrientation();
+
+    getIt<TensorCubit>().setPicture(imageXFile);
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          getIt<TensorCubit>().setPicture(pictureXFile);
-
-          setSystemUI();
-
-          setDefaultOrientation();
-
-          return const ColorsDetectedScreen();
-        },
-      ),
+      buildRoute(const ColorsDetectedScreen()),
     );
   }
 

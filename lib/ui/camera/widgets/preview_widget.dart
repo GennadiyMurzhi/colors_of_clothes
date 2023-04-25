@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/domen/ui_helpers.dart';
-import 'package:colors_of_clothes/ui/global.dart';
+import 'package:colors_of_clothes/app/global.dart';
 import 'package:flutter/cupertino.dart';
 
 class PreviewWidget extends StatelessWidget {

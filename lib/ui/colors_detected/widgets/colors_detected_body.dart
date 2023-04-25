@@ -52,20 +52,28 @@ class ColorsDetectedBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     child: Text(
-                      'Determined Colors',
+                      compatibleDeterminedColors.isNotEmpty ? 'Determined Colors' : 'Wrong Image',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  DeterminedColorsWidget(
-                    colorRowSymmetricPadding: colorRowSymmetricPadding,
-                    colorContainerSize: colorContainerSize,
-                    compatibleDeterminedColors: compatibleDeterminedColors,
-                    selectedPixelIndex: selectedPixelIndex,
-                    selectPixel: selectPixel,
-                  ),
-                  CompatibleColorsWidget(
-                    compatibleColors: selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
-                  ),
+                  if (compatibleDeterminedColors.isNotEmpty)
+                    DeterminedColorsWidget(
+                      colorRowSymmetricPadding: colorRowSymmetricPadding,
+                      colorContainerSize: colorContainerSize,
+                      compatibleDeterminedColors: compatibleDeterminedColors,
+                      selectedPixelIndex: selectedPixelIndex,
+                      selectPixel: selectPixel,
+                    ),
+                  if (compatibleDeterminedColors.isNotEmpty)
+                    CompatibleColorsWidget(
+                      compatibleColors:
+                          selectedPixelIndex != null ? compatibleDeterminedColors[selectedPixelIndex] : null,
+                    )
+                  else
+                    Text(
+                      'There is no person in the photo',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                 ],
               ),
             ),
