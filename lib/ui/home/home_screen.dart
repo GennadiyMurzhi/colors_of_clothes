@@ -24,9 +24,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     galleryAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
-    );
+    )..addListener(() {
+      if(galleryAnimationController.value == 1) {
+        BlocProvider.of<GalleryCubit>(context).setPhysics(null);
+      }
+    });
+
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    galleryAnimationController.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -35,12 +47,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onVerticalDragUpdate: (DragUpdateDetails details) {
         print('details.toString()');
         print(details.toString());
-        if (details.delta.dy <= 0) {
+        if (details.delta.dy <= 0 && galleryAnimationController.value == 0) {
           BlocProvider.of<GalleryCubit>(context).openGallery(galleryAnimationController.animateTo);
         }
-        if (details.delta.dy > 0) {
-          BlocProvider.of<GalleryCubit>(context).closeGallery(galleryAnimationController.animateBack);
-        }
+        // if (details.delta.dy > 0) {
+        //   BlocProvider.of<GalleryCubit>(context).closeGallery(galleryAnimationController.animateBack);
+        // }
       },
       child: Scaffold(
         body: BlocBuilder<GalleryCubit, GalleryState>(
@@ -94,10 +106,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     if (state.isOpen)
                       GalleryWidget(
+                        galleryAnimationController: galleryAnimationController,
                         animationValue: galleryAnimationController.value,
-                        entities: state.entities,
+                        photoFiles: state.photoFiles,
                         isGrantedPhotos: state.isGrantedPhotos,
                         isLoading: state.isLoading,
+                        physics: state.physics,
                       ),
                   ],
                 );
