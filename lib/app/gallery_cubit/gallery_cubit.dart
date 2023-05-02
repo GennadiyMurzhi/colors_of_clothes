@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -32,6 +33,9 @@ class GalleryCubit extends Cubit<GalleryState> {
         start: 0,
         end: assetCount,
       );
+
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList();
+
       for (int i = 0; i < entities.length; i++) {
         final File? photoFile = await entities[i].file;
         if (photoFile != null && photoFile.path.contains('.jpg', photoFile.path.length - 4)) {
@@ -58,35 +62,19 @@ class GalleryCubit extends Cubit<GalleryState> {
     }
   }
 
-  Future<void> openGallery(TickerFuture Function(double, {Curve curve, Duration? duration}) animateTo) async {
+  Future<void> openGallery() async {
     emit(
       state.copyWith(
         isOpen: true,
       ),
     );
-    await animateTo(
-      0.5,
-      curve: Curves.easeOutBack,
-      duration: const Duration(seconds: 1),
-    );
   }
 
-  Future<void> closeGallery(TickerFuture Function(double, {Curve curve, Duration? duration}) animateBack) async {
-    await animateBack(0, curve: Curves.easeOut);
+  void closeGallery() async {
     emit(
       state.copyWith(
         isOpen: false,
       ),
     );
   }
-
-  void setPhysics(ScrollPhysics? physics) {
-    emit(
-      state.copyWith(
-        physics: physics,
-      ),
-    );
-  }
-
-
 }

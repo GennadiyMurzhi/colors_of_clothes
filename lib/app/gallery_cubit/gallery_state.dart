@@ -7,8 +7,6 @@ class GalleryState with _$GalleryState {
     required bool isLoading,
     required List<File> photoFiles,
     required bool isOpen,
-    required bool canClose,
-    required ScrollPhysics? physics,
   }) = _GalleryState;
 
   factory GalleryState.initial() => const GalleryState(
@@ -16,7 +14,5 @@ class GalleryState with _$GalleryState {
         isLoading: true,
         photoFiles: <File>[],
         isOpen: false,
-        canClose: true,
-        physics: NeverScrollableScrollPhysics(),
       );
 }
