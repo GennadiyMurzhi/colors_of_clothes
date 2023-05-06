@@ -5,14 +5,14 @@ class GalleryState with _$GalleryState {
   const factory GalleryState({
     required bool isGrantedPhotos,
     required bool isLoading,
-    required List<File> photoFiles,
-    required bool isOpen,
+    required GalleryAlbums galleryAlbums,
+    required int selectedAlbumIndex,
   }) = _GalleryState;
 
-  factory GalleryState.initial() => const GalleryState(
+  factory GalleryState.initial() => GalleryState(
         isGrantedPhotos: false,
         isLoading: true,
-        photoFiles: <File>[],
-        isOpen: false,
+        galleryAlbums: GalleryAlbums.empty(),
+    selectedAlbumIndex: 0,
       );
 }

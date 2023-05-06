@@ -16,7 +16,7 @@ class ColorsClothesApp extends StatelessWidget {
           create: (BuildContext context) => getIt<TensorCubit>(),
         ),
         BlocProvider<GalleryCubit>(
-          create: (BuildContext context) => getIt<GalleryCubit>()..init(),
+          create: (BuildContext context) => getIt<GalleryCubit>(),
         ),
       ],
       child: MaterialApp(

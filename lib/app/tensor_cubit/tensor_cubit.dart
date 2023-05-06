@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/tensor.dart';
 import 'package:colors_of_clothes/domen/compatible_colors.dart';
 import 'package:colors_of_clothes/domen/determined_pixels.dart';
@@ -19,8 +18,7 @@ class TensorCubit extends Cubit<TensorState> {
 
   final Tensor _tensor;
 
-  Future<void> setPicture(XFile pictureXFile) async {
-    final File pictureFile = File(pictureXFile.path);
+  Future<void> setPicture(File pictureFile) async {
 
     final Uint8List cameraImage = await pictureFile.readAsBytes();
     final DeterminedPixels pixels = await _tensor.selectPixels(pictureFile);

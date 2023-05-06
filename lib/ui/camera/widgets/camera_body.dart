@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -43,7 +44,7 @@ class CameraBody extends StatelessWidget {
   final List<IconData> flashIconList;
   final bool isEnabledFlashButton;
   final CameraController cameraController;
-  final void Function(XFile) pushColorsDetected;
+  final void Function(File) pushColorsDetected;
   final bool isSwitchButtonRotated;
   final AnimationController switchAnimationController;
   final Future<void> Function(Uint8List) precacheCapturePreview;

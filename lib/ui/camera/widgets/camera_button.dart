@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:colors_of_clothes/domen/ui_helpers.dart';
+import 'package:colors_of_clothes/domen/ui_utils.dart';
 import 'package:flutter/material.dart';
 
 class CameraButton extends StatelessWidget {

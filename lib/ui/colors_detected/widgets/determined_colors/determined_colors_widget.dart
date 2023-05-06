@@ -1,5 +1,5 @@
 import 'package:colors_of_clothes/domen/compatible_colors.dart';
-import 'package:colors_of_clothes/domen/ui_helpers.dart';
+import 'package:colors_of_clothes/domen/ui_utils.dart';
 import 'package:colors_of_clothes/ui/colors_detected/widgets/determined_colors/determined_color_widget.dart';
 import 'package:flutter/material.dart';
 

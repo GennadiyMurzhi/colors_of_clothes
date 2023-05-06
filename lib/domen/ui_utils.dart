@@ -46,19 +46,15 @@ Duration calculateScrollTime({
   required double distance,
   required double velocity,
 }) {
-  print('distance: $distance');
-  print('velocity: $velocity');
   final int milliseconds;
   final double time = distance / velocity;
-  if (!time.isInfinite && !time.isNaN){
+  if (!time.isInfinite && !time.isNaN) {
     final int seconds = time.truncate();
     milliseconds = (seconds * 1000 + ((time - seconds) * 1000).truncate()).abs();
-    print('seconds: $seconds');
   } else {
     milliseconds = 500;
   }
 
-  print('milliseconds: $milliseconds');
   return Duration(
     milliseconds: milliseconds > 500 ? milliseconds : 500,
   );

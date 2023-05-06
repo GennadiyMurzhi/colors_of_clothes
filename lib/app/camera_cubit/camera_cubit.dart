@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
-import 'package:colors_of_clothes/app/global.dart';
+import 'package:colors_of_clothes/global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,7 +108,7 @@ class CameraCubit extends Cubit<CameraState> {
     required Future<XFile> Function() takePicture,
     required TickerFuture Function(double target, {Duration? duration, Curve curve}) animateToCameraButtonAnimation,
     required TickerFuture Function(double target, {Duration? duration, Curve curve}) animateBackCameraButtonAnimation,
-    required void Function(XFile) pushColorsDetected,
+    required void Function(File) pushColorsDetected,
   }) async {
     if (state.isEnabledPhotoButton) {
       emit(
@@ -122,7 +123,7 @@ class CameraCubit extends Cubit<CameraState> {
 
       await animateBackCameraButtonAnimation(0);
 
-      pushColorsDetected(pictureXFile);
+      pushColorsDetected(File(pictureXFile.path));
     }
   }
 

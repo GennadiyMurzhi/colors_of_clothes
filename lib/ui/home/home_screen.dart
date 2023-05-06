@@ -48,75 +48,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
     final Size size = MediaQuery.of(context).size;
     const double headerHeight = 30;
     final double height = size.height - MediaQuery.of(context).padding.top;
 
-    return BlocBuilder<GalleryCubit, GalleryState>(builder: (BuildContext context, GalleryState state) {
-      return GestureDetector(
-        onVerticalDragUpdate: (DragUpdateDetails details) async {
-          if (details.delta.dy < -10 && !state.isOpen) {
-            openGallery(height * 0.5);
-          }
-        },
-        child: Scaffold(
-          body: AnimatedBuilder(
-            animation: galleryAnimationController,
-            builder: (BuildContext context, Widget? child) {
-              return Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  SizedBox.fromSize(
-                    size: MediaQuery.of(context).size,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 300),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              buildRoute(const CameraScreen()),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.camera_alt,
-                          ),
+    return GestureDetector(
+      onVerticalDragUpdate: (DragUpdateDetails details) async {
+        if (details.delta.dy < -10) {
+          openGallery(height * 0.5);
+        }
+      },
+      child: Scaffold(
+        body: AnimatedBuilder(
+          animation: galleryAnimationController,
+          builder: (BuildContext context, Widget? child) {
+            return Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                SizedBox.fromSize(
+                  size: MediaQuery.of(context).size,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 300),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            buildRoute(const CameraScreen()),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.camera_alt,
                         ),
-                        IconButton(
-                          onPressed: () {
-                            openGallery(height * 0.5);
-                          },
-                          icon: const Icon(
-                            Icons.image_rounded,
-                          ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          openGallery(height * 0.5);
+                        },
+                        icon: const Icon(
+                          Icons.image_rounded,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Positioned(
-                    top: height * (1 - galleryAnimationController.value),
-                    child: GalleryWidget(
-                      galleryAnimationController: galleryAnimationController,
-                      animationValue: galleryAnimationController.value,
-                      photoFiles: state.photoFiles,
-                      isGrantedPhotos: state.isGrantedPhotos,
-                      isLoading: state.isLoading,
-                      scrollController: galleryScrollController,
-                      size: size,
-                      height: height,
-                      headerHeight: headerHeight,
-                    ),
+                ),
+                Positioned(
+                  top: height * (1 - galleryAnimationController.value),
+                  child: GalleryWidget(
+                    galleryAnimationController: galleryAnimationController,
+                    animationValue: galleryAnimationController.value,
+                    scrollController: galleryScrollController,
+                    size: size,
+                    height: height,
+                    headerHeight: headerHeight,
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
-      );
-    });
+      ),
+    );
   }
 }

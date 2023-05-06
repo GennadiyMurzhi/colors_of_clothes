@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
-import 'package:colors_of_clothes/domen/ui_helpers.dart';
-import 'package:colors_of_clothes/app/global.dart';
+import 'package:colors_of_clothes/domen/ui_utils.dart';
+import 'package:colors_of_clothes/global.dart';
 import 'package:flutter/cupertino.dart';
 
 class PreviewWidget extends StatelessWidget {

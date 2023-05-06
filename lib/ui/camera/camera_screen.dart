@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
@@ -5,7 +7,7 @@ import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_body.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
 import 'package:colors_of_clothes/domen/system.dart';
-import 'package:colors_of_clothes/app/global.dart';
+import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +60,7 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
 
     cameraButtonAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 500),
     );
 
     switchAnimationController = AnimationController(
@@ -132,12 +134,12 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     Navigator.of(context).pop();
   }
 
-  void pushColorsDetected(XFile imageXFile) {
+  void pushColorsDetected(File imageFile) {
     setSystemUI();
 
     setDefaultOrientation();
 
-    getIt<TensorCubit>().setPicture(imageXFile);
+    getIt<TensorCubit>().setPicture(imageFile);
 
     Navigator.pushReplacement(
       context,

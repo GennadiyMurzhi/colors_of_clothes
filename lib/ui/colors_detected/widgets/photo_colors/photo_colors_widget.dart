@@ -1,6 +1,6 @@
 import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:colors_of_clothes/ui/colors_detected/widgets/photo_colors/color_mark_widget.dart';
-import 'package:colors_of_clothes/domen/ui_helpers.dart';
+import 'package:colors_of_clothes/domen/ui_utils.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
