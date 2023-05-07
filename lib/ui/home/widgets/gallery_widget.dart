@@ -12,30 +12,26 @@ import 'package:sliver_tools/sliver_tools.dart';
 class GalleryWidget extends StatefulWidget {
   const GalleryWidget({
     super.key,
-    required this.animationValue,
     required this.galleryAnimationController,
     required this.scrollController,
     required this.size,
     required this.height,
-    required this.headerHeight,
   });
 
-  final double animationValue;
   final AnimationController galleryAnimationController;
   final ScrollController scrollController;
   final Size size;
   final double height;
-  final double headerHeight;
 
   @override
   State<StatefulWidget> createState() => _GalleryState();
 }
 
 class _GalleryState extends State<GalleryWidget> {
+  final double startHeaderHeight = 30;
   late double headerHeight;
   final double spacing = 6;
   final double backButtonWidth = 50;
-
   double radius = 15;
   double opacity = 1;
   bool isClosingByEmptySliver = false;
@@ -43,9 +39,9 @@ class _GalleryState extends State<GalleryWidget> {
 
   @override
   void initState() {
-    super.initState();
+    headerHeight = startHeaderHeight;
 
-    headerHeight = widget.headerHeight;
+    super.initState();
   }
 
   Future<void> closeGalleryWithAnimation() async {
@@ -73,8 +69,8 @@ class _GalleryState extends State<GalleryWidget> {
           changed = true;
         }
       }
-      if (headerHeight != widget.headerHeight) {
-        headerHeight = widget.headerHeight;
+      if (headerHeight != startHeaderHeight) {
+        headerHeight = startHeaderHeight;
         if (!changed) {
           changed = true;
         }
@@ -98,8 +94,8 @@ class _GalleryState extends State<GalleryWidget> {
           changed = true;
         }
       }
-      if (headerHeight != widget.headerHeight * 2) {
-        headerHeight = widget.headerHeight * 2;
+      if (headerHeight != startHeaderHeight * 2) {
+        headerHeight = startHeaderHeight * 2;
         if (!changed) {
           changed = true;
         }
@@ -116,7 +112,7 @@ class _GalleryState extends State<GalleryWidget> {
       final double headerIndex = 2 - (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
       setState(() {
         radius = 10 * deleteIndex;
-        headerHeight = widget.headerHeight * headerIndex;
+        headerHeight = startHeaderHeight * headerIndex;
         opacity = 1 * deleteIndex;
       });
     }
@@ -179,10 +175,6 @@ class _GalleryState extends State<GalleryWidget> {
                 builder: (BuildContext context, GalleryState state) {
                   final int childCount = state.galleryAlbums.albums[state.selectedAlbumIndex].entities.length;
                   final double childrenHeight = (childCount < 3 ? 1 : childCount / 3) * (widget.size.width / 3);
-
-                  print('childCount: $childCount');
-                  print('childrenHeight: $childrenHeight');
-                  print('widget.height - childrenHeight: ${widget.height - childrenHeight}');
 
                   return CustomScrollView(
                     controller: widget.scrollController,

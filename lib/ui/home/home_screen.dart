@@ -1,5 +1,9 @@
 import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
 import 'package:colors_of_clothes/ui/camera/camera_screen.dart';
+import 'package:colors_of_clothes/ui/home/widgets/button_widget.dart';
+import 'package:colors_of_clothes/ui/home/widgets/camera_and_gallery_buttons_widget.dart';
+import 'package:colors_of_clothes/ui/home/widgets/caption_widget.dart';
+import 'package:colors_of_clothes/ui/home/widgets/clippers.dart';
 import 'package:colors_of_clothes/ui/home/widgets/gallery_widget.dart';
 import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
@@ -36,9 +40,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void openGallery(double jumpTo) {
+  void openGallery(double height) {
     BlocProvider.of<GalleryCubit>(context).openGallery();
-    galleryScrollController.jumpTo(jumpTo);
+    galleryScrollController.jumpTo(height * 0.5);
     galleryAnimationController.animateTo(
       1,
       curve: Curves.easeOutBack,
@@ -49,66 +53,75 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    const double headerHeight = 30;
     final double height = size.height - MediaQuery.of(context).padding.top;
+
+    const double bigButtonSize = 80;
 
     return GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) async {
         if (details.delta.dy < -10) {
-          openGallery(height * 0.5);
+          openGallery(height);
         }
       },
       child: Scaffold(
-        body: AnimatedBuilder(
-          animation: galleryAnimationController,
-          builder: (BuildContext context, Widget? child) {
-            return Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                SizedBox.fromSize(
-                  size: MediaQuery.of(context).size,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 300),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            buildRoute(const CameraScreen()),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.camera_alt,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          openGallery(height * 0.5);
-                        },
-                        icon: const Icon(
-                          Icons.image_rounded,
-                        ),
-                      ),
-                    ],
+        backgroundColor: const Color(0xFFE6E6E6),
+        body: SafeArea(
+          child: AnimatedBuilder(
+            animation: galleryAnimationController,
+            builder: (BuildContext context, Widget? child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  Positioned(
+                    top: 15,
+                    left: 15,
+                    child: GradientButtonWidget(
+                      width: 35,
+                      height: 30,
+                      clipper: MenuButtonClipper(),
+                      onTap: () {},
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: height * (1 - galleryAnimationController.value),
-                  child: GalleryWidget(
-                    galleryAnimationController: galleryAnimationController,
-                    animationValue: galleryAnimationController.value,
-                    scrollController: galleryScrollController,
-                    size: size,
-                    height: height,
-                    headerHeight: headerHeight,
+                  SizedBox.fromSize(
+                    size: MediaQuery.of(context).size,
                   ),
-                ),
-              ],
-            );
-          },
+                  Positioned(
+                    top: height / 2 - bigButtonSize,
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: CameraAndGalleryButtonsWidget(
+                            buttonSize: bigButtonSize,
+                            onTapCameraButton: () {
+                              Navigator.push(
+                                context,
+                                buildRoute(const CameraScreen()),
+                              );
+                            },
+                            onTapGalleryButton: () {
+                              openGallery(height);
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 70),
+                        const CaptionWidget(),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: height * (1 - galleryAnimationController.value),
+                    child: GalleryWidget(
+                      galleryAnimationController: galleryAnimationController,
+                      scrollController: galleryScrollController,
+                      size: size,
+                      height: height,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
