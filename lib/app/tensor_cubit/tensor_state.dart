@@ -13,6 +13,6 @@ class TensorState with _$TensorState {
         cameraImage: null,
         pixels: null,
         compatibleDeterminedColors: null,
-        colorDetermination: true,
+        colorDetermination: false,
       );
 }

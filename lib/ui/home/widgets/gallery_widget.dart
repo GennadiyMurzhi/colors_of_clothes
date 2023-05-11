@@ -173,8 +173,13 @@ class _GalleryState extends State<GalleryWidget> {
             child: Scrollbar(
               child: BlocBuilder<GalleryCubit, GalleryState>(
                 builder: (BuildContext context, GalleryState state) {
-                  final int childCount = state.galleryAlbums.albums[state.selectedAlbumIndex].entities.length;
-                  final double childrenHeight = (childCount < 3 ? 1 : childCount / 3) * (widget.size.width / 3);
+                  final double childrenHeight;
+                  if (!state.isLoading) {
+                    final int childCount = state.galleryAlbums.albums[state.selectedAlbumIndex].entities.length;
+                    childrenHeight = (childCount < 3 ? 1 : childCount / 3) * (widget.size.width / 3);
+                  } else {
+                    childrenHeight = 0;
+                  }
 
                   return CustomScrollView(
                     controller: widget.scrollController,
@@ -216,7 +221,6 @@ class _GalleryState extends State<GalleryWidget> {
                                     opacity: 1 - opacity,
                                     duration: const Duration(milliseconds: 5),
                                     child: Row(
-                                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         IgnorePointer(
                                           ignoring: ignoringCloseButton,
@@ -226,37 +230,36 @@ class _GalleryState extends State<GalleryWidget> {
                                             },
                                           ),
                                         ),
-                                        SizedBox(
-                                          width: widget.size.width - 50,
-                                          child: DropdownButton(
-                                            isDense: false,
-                                            isExpanded: true,
-                                            value: state.galleryAlbums.albums[state.selectedAlbumIndex],
-                                            items: state.galleryAlbums.albums
-                                                .map<DropdownMenuItem<GalleryAlbum>>(
-                                                  (GalleryAlbum album) => DropdownMenuItem<GalleryAlbum>(
-                                                    value: album,
-                                                    child: Text(
-                                                      album.assetPathEntity == null
-                                                          ? 'All'
-                                                          : album.assetPathEntity!.name,
+                                        if (!state.isLoading)
+                                          SizedBox(
+                                            width: widget.size.width - 50,
+                                            child: DropdownButton(
+                                              isDense: false,
+                                              isExpanded: true,
+                                              value: state.galleryAlbums.albums[state.selectedAlbumIndex],
+                                              items: state.galleryAlbums.albums
+                                                  .map<DropdownMenuItem<GalleryAlbum>>(
+                                                    (GalleryAlbum album) => DropdownMenuItem<GalleryAlbum>(
+                                                      value: album,
+                                                      child: Text(
+                                                        album.assetPathEntity == null
+                                                            ? 'All'
+                                                            : album.assetPathEntity!.name,
+                                                      ),
                                                     ),
-                                                  ),
-                                                )
-                                                .toList(),
-                                            onChanged: (GalleryAlbum? album) {
-                                              if (album != null) {
-                                                BlocProvider.of<GalleryCubit>(context)
-                                                    .loadAlbum(
-                                                      albumId: album.assetPathEntity != null
-                                                          ? album.assetPathEntity!.id
-                                                          : null,
-                                                    )
-                                                    .whenComplete(() => setState(() {}));
-                                              }
-                                            },
+                                                  )
+                                                  .toList(),
+                                              onChanged: (GalleryAlbum? album) {
+                                                if (album != null) {
+                                                  BlocProvider.of<GalleryCubit>(context).loadAlbum(
+                                                    albumId: album.assetPathEntity != null
+                                                        ? album.assetPathEntity!.id
+                                                        : null,
+                                                  );
+                                                }
+                                              },
+                                            ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -290,49 +293,62 @@ class _GalleryState extends State<GalleryWidget> {
                               width: widget.size.width,
                             ),
                           ),
-                          SliverPadding(
-                            padding: EdgeInsets.all(spacing),
-                            sliver: SliverGrid(
-                              key: UniqueKey(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisSpacing: spacing,
-                                crossAxisSpacing: spacing,
-                                crossAxisCount: 3,
-                              ),
-                              delegate: SliverChildListDelegate(
-                                List<Widget>.generate(
-                                  state.galleryAlbums.albums[state.selectedAlbumIndex].entities.length,
-                                  (int index) => state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles !=
-                                              null &&
-                                          index <=
-                                              state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles!
-                                                      .length -
-                                                  1
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            getIt<TensorCubit>().setPicture(state
-                                                .galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles![index]);
+                          if (!state.isLoading)
+                            SliverPadding(
+                              padding: EdgeInsets.all(spacing),
+                              sliver: SliverGrid(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  mainAxisSpacing: spacing,
+                                  crossAxisSpacing: spacing,
+                                  crossAxisCount: 3,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                    return state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles != null &&
+                                            index <=
+                                                state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles!
+                                                        .length -
+                                                    1
+                                        ? InkWell(
+                                            onTap: () {
+                                              getIt<TensorCubit>().setPicture(state.galleryAlbums
+                                                  .albums[state.selectedAlbumIndex].entitiesFiles![index]);
 
-                                            Navigator.push(
-                                              context,
-                                              buildRoute(const ColorsDetectedScreen()),
-                                            );
-                                            closeGalleryWithAnimation();
-                                          },
-                                          child: Image.file(
-                                            state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles![index],
-                                            cacheWidth: widget.size.width ~/ 3,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : SizedBox(
-                                          width: widget.size.width / 3,
-                                          height: widget.size.width / 3,
-                                        ),
+                                              Navigator.push(
+                                                context,
+                                                buildRoute(const ColorsDetectedScreen()),
+                                              );
+                                              closeGalleryWithAnimation();
+                                            },
+                                            child: Image.file(
+                                              state
+                                                  .galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles![index],
+                                              cacheWidth: widget.size.width ~/ 3,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : SizedBox(
+                                            width: widget.size.width / 3,
+                                            height: widget.size.width / 3,
+                                          );
+                                  },
+                                  childCount: state.galleryAlbums.albums[state.selectedAlbumIndex].entities.length,
+                                ),
+                              ),
+                            )
+                          else
+                            SliverToBoxAdapter(
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: widget.height / 6),
+                                  child: Text(
+                                    'Loading ... \n So many pics 🤗',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context).textTheme.headlineSmall,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       if (childrenHeight < widget.height)

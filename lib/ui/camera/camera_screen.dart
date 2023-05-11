@@ -41,17 +41,34 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
       DeviceOrientation.portraitUp,
     ]);
 
-    WidgetsBinding.instance.addObserver(this);
+
 
     cameraController = createController(cameras[0]);
 
     cameraController.initialize().then(
       (value) {
+        if (!mounted) {
+          return;
+        }
+
         controllerIsInitialized = true;
+
+        WidgetsBinding.instance.addObserver(this);
 
         setState(() {});
       },
-    );
+    ).catchError((Object e) {
+      if (e is CameraException) {
+        switch (e.code) {
+          case 'CameraAccessDenied':
+            // Handle access errors here.
+            break;
+          default:
+            // Handle other errors here.
+            break;
+        }
+      }
+    });
 
     flashButtonAnimationController = AnimationController(
       vsync: this,
@@ -127,17 +144,19 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
   }
 
   void backButtonOnPressed() {
-    setSystemUI();
-
-    setDefaultOrientation();
+    _setDefaultSystemSettings();
 
     Navigator.of(context).pop();
   }
 
-  void pushColorsDetected(File imageFile) {
-    setSystemUI();
+  Future<bool> onWillPop() async {
+    _setDefaultSystemSettings();
 
-    setDefaultOrientation();
+    return true;
+  }
+
+  void pushColorsDetected(File imageFile) {
+    _setDefaultSystemSettings();
 
     getIt<TensorCubit>().setPicture(imageFile);
 
@@ -145,6 +164,12 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
       context,
       buildRoute(const ColorsDetectedScreen()),
     );
+  }
+
+  void _setDefaultSystemSettings() {
+    setSystemUI();
+
+    setDefaultOrientation();
   }
 
   Future<void> precacheCapturePreview(Uint8List capturePreview) async {
@@ -168,41 +193,44 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     final double previewHeight = MediaQuery.of(context).size.height;
     final double previewWidth = previewHeight * previewSize.height / previewSize.width;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: BackButton(
-          onPressed: backButtonOnPressed,
+    return WillPopScope(
+      onWillPop: onWillPop,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        extendBody: true,
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: BackButton(
+            onPressed: backButtonOnPressed,
+          ),
         ),
-      ),
-      body: BlocProvider<CameraCubit>(
-        create: (context) => getIt<CameraCubit>()..setFlashIconOnInit(cameraController.value.flashMode),
-        child: BlocBuilder<CameraCubit, CameraState>(
-          builder: (BuildContext context, CameraState state) {
-            return CameraBody(
-              previewWidth: previewWidth,
-              previewHeight: previewHeight,
-              isEnabledSwitchButton: state.isEnabledSwitchButton,
-              controllerIsInitialized: controllerIsInitialized,
-              switchAnimationController: switchAnimationController,
-              capturePreview: state.capturePreview,
-              cameraController: cameraController,
-              orientationAnimationController: orientationAnimationController,
-              isCameraNotSwitched: state.isCameraNotSwitched,
-              flashButtonAnimationController: flashButtonAnimationController,
-              cameraButtonAnimationController: cameraButtonAnimationController,
-              flashIconList: state.flashIconList,
-              isEnabledFlashButton: state.isEnabledFlashButton,
-              pushColorsDetected: pushColorsDetected,
-              isSwitchButtonRotated: state.isSwitchButtonRotated,
-              precacheCapturePreview: precacheCapturePreview,
-              setCameraControllerAndIsInitialized: setCameraControllerAndIsInitialized,
-            );
-          },
+        body: BlocProvider<CameraCubit>(
+          create: (context) => getIt<CameraCubit>()..setFlashIconOnInit(cameraController.value.flashMode),
+          child: BlocBuilder<CameraCubit, CameraState>(
+            builder: (BuildContext context, CameraState state) {
+              return CameraBody(
+                previewWidth: previewWidth,
+                previewHeight: previewHeight,
+                isEnabledSwitchButton: state.isEnabledSwitchButton,
+                controllerIsInitialized: controllerIsInitialized,
+                switchAnimationController: switchAnimationController,
+                capturePreview: state.capturePreview,
+                cameraController: cameraController,
+                orientationAnimationController: orientationAnimationController,
+                isCameraNotSwitched: state.isCameraNotSwitched,
+                flashButtonAnimationController: flashButtonAnimationController,
+                cameraButtonAnimationController: cameraButtonAnimationController,
+                flashIconList: state.flashIconList,
+                isEnabledFlashButton: state.isEnabledFlashButton,
+                pushColorsDetected: pushColorsDetected,
+                isSwitchButtonRotated: state.isSwitchButtonRotated,
+                precacheCapturePreview: precacheCapturePreview,
+                setCameraControllerAndIsInitialized: setCameraControllerAndIsInitialized,
+              );
+            },
+          ),
         ),
       ),
     );

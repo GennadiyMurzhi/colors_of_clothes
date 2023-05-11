@@ -19,6 +19,11 @@ class TensorCubit extends Cubit<TensorState> {
   final Tensor _tensor;
 
   Future<void> setPicture(File pictureFile) async {
+    emit(
+      state.copyWith(
+        colorDetermination: true,
+      ),
+    );
 
     final Uint8List cameraImage = await pictureFile.readAsBytes();
     final DeterminedPixels pixels = await _tensor.selectPixels(pictureFile);
@@ -35,7 +40,9 @@ class TensorCubit extends Cubit<TensorState> {
     );
   }
 
-  void setInitial(){
-    emit(TensorState.initial());
+  void setInitial() {
+    if(state.cameraImage != null) {
+      emit(TensorState.initial());
+    }
   }
 }

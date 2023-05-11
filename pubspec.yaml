@@ -18,11 +18,14 @@ dependencies:
   image: 4.0.15
   palette_generator: 0.3.3+2
   flutter_bloc: 8.1.2
+  bloc_concurrency: 0.2.1
   photo_manager: 2.6.0
   sliver_tools: 0.2.10
   freezed: 2.3.2
   freezed_annotation: 2.2.0
   injectable: 2.1.1
+  animate_gradient: 0.0.2
+
 
   cupertino_icons: ^1.0.2
 
@@ -31,6 +34,7 @@ dev_dependencies:
     sdk: flutter
   build_runner: 2.3.3
   injectable_generator: 2.1.5
+  flutter_native_splash: 2.2.19
 
   flutter_lints: ^2.0.0
 
@@ -41,3 +45,13 @@ flutter:
   assets:
     - assets/labels.txt
     - assets/model_unquant.tflite
+
+flutter_native_splash:
+  color: "#fce3e4"
+  image: assets/images/icon.png
+  color_dark: "#ec99a9"
+
+  android_12:
+    image: assets/images/icon.png
+    icon_background_color: "#fce3e4"
+    icon_background_color_dark: "#ec99a9"

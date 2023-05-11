@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:colors_of_clothes/domen/app_utils.dart';
@@ -77,7 +78,7 @@ class GalleryCubit extends Cubit<GalleryState> {
     String? albumId,
     bool onOpenGallery = false,
   }) async {
-    if (!onOpenGallery){
+    if (!onOpenGallery) {
       final int albumIndex;
       if (albumId == null) {
         albumIndex = 0;
@@ -122,6 +123,18 @@ class GalleryCubit extends Cubit<GalleryState> {
   }
 
   Future<void> openGallery() async {
-    loadAlbum(onOpenGallery: true);
+    if (state.isLoading) {
+      late StreamSubscription<GalleryState> subscription;
+      subscription = stream.listen(
+        (event) async {
+          if (!state.isLoading) {
+            await loadAlbum(onOpenGallery: true);
+            subscription.cancel();
+          }
+        },
+      );
+    } else {
+      loadAlbum(onOpenGallery: true);
+    }
   }
 }

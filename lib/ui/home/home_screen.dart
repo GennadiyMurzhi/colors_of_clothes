@@ -1,4 +1,5 @@
 import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
+import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/ui/camera/camera_screen.dart';
 import 'package:colors_of_clothes/ui/home/widgets/button_widget.dart';
 import 'package:colors_of_clothes/ui/home/widgets/camera_and_gallery_buttons_widget.dart';
@@ -16,7 +17,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin implements RouteAware{
   late AnimationController galleryAnimationController;
   late ScrollController galleryScrollController;
 
@@ -39,6 +40,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     super.dispose();
   }
+
+  @override
+  void didPop() {
+    BlocProvider.of<TensorCubit>(context).setInitial();
+  }
+
+  @override
+  void didPopNext() {
+    BlocProvider.of<TensorCubit>(context).setInitial();
+  }
+
+  @override
+  void didPush() {}
+
+  @override
+  void didPushNext() {}
 
   void openGallery(double height) {
     BlocProvider.of<GalleryCubit>(context).openGallery();
@@ -126,4 +143,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+
 }

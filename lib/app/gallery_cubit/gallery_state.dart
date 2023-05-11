@@ -13,6 +13,7 @@ class GalleryState with _$GalleryState {
         isGrantedPhotos: false,
         isLoading: true,
         galleryAlbums: GalleryAlbums.empty(),
-    selectedAlbumIndex: 0,
+        selectedAlbumIndex: 0,
       );
 }
+

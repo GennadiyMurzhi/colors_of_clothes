@@ -15,7 +15,6 @@ class ColorsDetectedScreen extends StatelessWidget {
         leading: BackButton(
           color: Colors.black,
           onPressed: () {
-            BlocProvider.of<TensorCubit>(context).setInitial();
             Navigator.maybePop(context);
           },
         ),
