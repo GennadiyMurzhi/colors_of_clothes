@@ -17,41 +17,39 @@ class CameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double cameraButtonAnimationValue = cameraButtonAnimationController.value;
-
     return GestureDetector(
       onTap: onTap,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          AnimatedBuilder(
-            animation: cameraButtonAnimationController,
-            builder: (BuildContext context, Widget? widget) {
-              return Container(
-                width: 80,
-                height: 80,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    width: 3,
-                    color: Colors.white,
+      child: AnimatedBuilder(
+          animation: cameraButtonAnimationController,
+          builder: (BuildContext context, Widget? widget) {
+            final double cameraButtonAnimationValue = cameraButtonAnimationController.value;
+
+            return Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      width: 3,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-          Transform.rotate(
-            angle: pi * cameraButtonAnimationValue + orientationAngle(orientationAnimationValue),
-            child: Icon(
-              Icons.camera,
-              color: Colors.white,
-              size: 80 * (1 - cameraButtonAnimationValue),
-            ),
-          ),
-        ],
-      ),
+                Transform.rotate(
+                  angle: pi * cameraButtonAnimationValue + orientationAngle(orientationAnimationValue),
+                  child: Icon(
+                    Icons.camera,
+                    color: Colors.white,
+                    size: 80 * (1 - cameraButtonAnimationValue),
+                  ),
+                ),
+              ],
+            );
+          }),
     );
   }
 }

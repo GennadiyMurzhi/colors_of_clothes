@@ -19,8 +19,6 @@ class FlashButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double flashButtonAnimationValue = flashButtonAnimationController.value;
-
     return InkWell(
       onTap: () async {
         if (setFlashMode != null) {
@@ -31,6 +29,8 @@ class FlashButton extends StatelessWidget {
           ? AnimatedBuilder(
               animation: flashButtonAnimationController,
               builder: (BuildContext context, Widget? widget) {
+                final double flashButtonAnimationValue = flashButtonAnimationController.value;
+
                 return Transform.rotate(
                   angle: orientationAngle(orientationAnimationValue),
                   alignment: Alignment.center,

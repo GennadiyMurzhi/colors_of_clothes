@@ -107,15 +107,17 @@ class _GalleryState extends State<GalleryWidget> {
   }
 
   void changeHeaderOnScroll(ScrollNotification notification) {
-    if (notification.metrics.pixels >= widget.height * 0.9 && notification.metrics.pixels <= widget.height) {
-      final double deleteIndex = (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
-      final double headerIndex = 2 - (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
-      setState(() {
-        radius = 10 * deleteIndex;
-        headerHeight = startHeaderHeight * headerIndex;
-        opacity = 1 * deleteIndex;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (notification.metrics.pixels >= widget.height * 0.9 && notification.metrics.pixels <= widget.height) {
+        final double deleteIndex = (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
+        final double headerIndex = 2 - (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
+        setState(() {
+          radius = 10 * deleteIndex;
+          headerHeight = startHeaderHeight * headerIndex;
+          opacity = 1 * deleteIndex;
+        });
+      }
+    });
   }
 
   void changeIgnoringCloseButton(ScrollNotification notification) {
@@ -273,9 +275,9 @@ class _GalleryState extends State<GalleryWidget> {
                                     child: Container(
                                       width: 30,
                                       height: 5,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        borderRadius: const BorderRadius.all(Radius.circular(5)),
                                       ),
                                     ),
                                   ),
@@ -289,7 +291,7 @@ class _GalleryState extends State<GalleryWidget> {
                         children: <Widget>[
                           SliverPositioned.fill(
                             child: Container(
-                              color: Colors.grey,
+                              color: Theme.of(context).colorScheme.secondaryContainer,
                               width: widget.size.width,
                             ),
                           ),
@@ -342,9 +344,9 @@ class _GalleryState extends State<GalleryWidget> {
                                 child: Padding(
                                   padding: EdgeInsets.only(top: widget.height / 6),
                                   child: Text(
-                                    'Loading ... \n So many pics 🤗',
+                                    'Loading ...\n So many pics 🤗',
                                     textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.headlineSmall,
+                                    style: Theme.of(context).textTheme.titleLarge,
                                   ),
                                 ),
                               ),
@@ -356,7 +358,7 @@ class _GalleryState extends State<GalleryWidget> {
                           child: Container(
                             width: widget.size.width,
                             height: widget.height - childrenHeight - headerHeight,
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.secondaryContainer,
                           ),
                         ),
                     ],
@@ -387,17 +389,18 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(radius),
-            topRight: Radius.circular(radius),
-          ),
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(radius),
+          topRight: Radius.circular(radius),
         ),
-        alignment: Alignment.center,
-        child: child);
+      ),
+      alignment: Alignment.center,
+      child: child,
+    );
   }
 
   @override

@@ -81,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin 
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFE6E6E6),
         body: SafeArea(
           child: AnimatedBuilder(
             animation: galleryAnimationController,

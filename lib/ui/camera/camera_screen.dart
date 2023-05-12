@@ -6,7 +6,7 @@ import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_body.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
-import 'package:colors_of_clothes/domen/system.dart';
+import 'package:colors_of_clothes/system.dart';
 import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
@@ -57,18 +57,7 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
 
         setState(() {});
       },
-    ).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            // Handle access errors here.
-            break;
-          default:
-            // Handle other errors here.
-            break;
-        }
-      }
-    });
+    );
 
     flashButtonAnimationController = AnimationController(
       vsync: this,
