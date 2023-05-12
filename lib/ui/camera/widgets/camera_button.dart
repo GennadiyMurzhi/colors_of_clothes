@@ -17,6 +17,8 @@ class CameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double buttonSize = 80;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedBuilder(
@@ -28,8 +30,8 @@ class CameraButton extends StatelessWidget {
               alignment: AlignmentDirectional.center,
               children: <Widget>[
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: buttonSize,
+                  height: buttonSize,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     shape: BoxShape.circle,
@@ -44,7 +46,7 @@ class CameraButton extends StatelessWidget {
                   child: Icon(
                     Icons.camera,
                     color: Colors.white,
-                    size: 80 * (1 - cameraButtonAnimationValue),
+                    size: buttonSize * (1 - cameraButtonAnimationValue),
                   ),
                 ),
               ],

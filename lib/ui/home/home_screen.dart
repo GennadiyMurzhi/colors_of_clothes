@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/ui/camera/camera_screen.dart';
@@ -17,7 +19,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin implements RouteAware{
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin implements RouteAware {
   late AnimationController galleryAnimationController;
   late ScrollController galleryScrollController;
 
@@ -72,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin 
     final Size size = MediaQuery.of(context).size;
     final double height = size.height - MediaQuery.of(context).padding.top;
 
-    const double bigButtonSize = 80;
+    const double bigButtonSize = 100;
 
     return GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) async {
@@ -88,43 +90,52 @@ class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin 
               return Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
-                  Positioned(
-                    top: 15,
-                    left: 15,
-                    child: GradientButtonWidget(
-                      width: 35,
-                      height: 30,
-                      clipper: MenuButtonClipper(),
-                      onTap: () {},
-                    ),
-                  ),
                   SizedBox.fromSize(
                     size: MediaQuery.of(context).size,
                   ),
                   Positioned(
-                    top: height / 2 - bigButtonSize,
+                    top: 2,
+                    left: 3,
+                    child: GradientButtonWidget(
+                      width: 37,
+                      height: 30,
+                      padding: const EdgeInsets.all(20),
+                      clipper: MenuButtonClipper(),
+                      onTap: () {},
+                    ),
+                  ),
+                  Positioned(
+                    top: height / 2 - bigButtonSize * 0.7,
                     child: Column(
                       children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: CameraAndGalleryButtonsWidget(
-                            buttonSize: bigButtonSize,
-                            onTapCameraButton: () {
-                              Navigator.push(
-                                context,
-                                buildRoute(const CameraScreen()),
-                              );
-                            },
-                            onTapGalleryButton: () {
-                              openGallery(height);
-                            },
-                          ),
+                        CameraAndGalleryButtonsWidget(
+                          buttonSize: bigButtonSize,
+                          buttonPadding: const EdgeInsets.all(25),
+                          onTapCameraButton: () {
+                            Navigator.push(
+                              context,
+                              buildRoute(const CameraScreen()),
+                            );
+                          },
+                          onTapGalleryButton: () {
+                            openGallery(height);
+                          },
                         ),
-                        const SizedBox(height: 70),
+                        const SizedBox(height: 40),
                         const CaptionWidget(),
                       ],
                     ),
                   ),
+                  if (galleryAnimationController.value != 0)
+                    BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 3 * galleryAnimationController.value,
+                        sigmaY: 3 * galleryAnimationController.value,
+                      ),
+                      child: SizedBox.fromSize(
+                        size: MediaQuery.of(context).size,
+                      ),
+                    ),
                   Positioned(
                     top: height * (1 - galleryAnimationController.value),
                     child: GalleryWidget(
@@ -142,6 +153,4 @@ class _HomeScreenState extends State<HomeScreen>  with TickerProviderStateMixin 
       ),
     );
   }
-
-
 }

@@ -35,7 +35,8 @@ class _GalleryState extends State<GalleryWidget> {
   double radius = 15;
   double opacity = 1;
   bool isClosingByEmptySliver = false;
-  bool ignoringCloseButton = true;
+  bool ignoringHeaderButtons = true;
+  bool isCustomEndPositionScrolling = false;
 
   @override
   void initState() {
@@ -121,29 +122,10 @@ class _GalleryState extends State<GalleryWidget> {
   }
 
   void changeIgnoringCloseButton(ScrollNotification notification) {
-    if (notification.metrics.pixels >= widget.height * 0.95 && ignoringCloseButton != false) {
-      ignoringCloseButton = false;
-    } else if (notification.metrics.pixels <= widget.height * 0.95 && ignoringCloseButton != true) {
-      ignoringCloseButton = true;
-    }
-  }
-
-  void customEndPosition(ScrollNotification notification) {
-    if (!isClosingByEmptySliver &&
-        notification is ScrollUpdateNotification &&
-        widget.scrollController.position.activity != null &&
-        widget.scrollController.position.activity!.velocity <= 0 &&
-        notification.metrics.pixels >= widget.height * 0.5) {
-      final double velocity = widget.scrollController.position.activity!.velocity.abs();
-      final double distance = (widget.height * 0.5 - notification.metrics.pixels).abs();
-
-      if (velocity > distance) {
-        widget.scrollController.animateTo(
-          widget.height * 0.5,
-          curve: Curves.linear,
-          duration: calculateScrollTime(distance: distance, velocity: velocity),
-        );
-      }
+    if (notification.metrics.pixels >= widget.height * 0.95 && ignoringHeaderButtons != false) {
+      ignoringHeaderButtons = false;
+    } else if (notification.metrics.pixels <= widget.height * 0.95 && ignoringHeaderButtons != true) {
+      ignoringHeaderButtons = true;
     }
   }
 
@@ -165,7 +147,6 @@ class _GalleryState extends State<GalleryWidget> {
             changeHeaderIfExpanded(notification);
             changeHeaderOnScroll(notification);
             changeIgnoringCloseButton(notification);
-            customEndPosition(notification);
             closeGallery(notification);
 
             return true;
@@ -222,47 +203,48 @@ class _GalleryState extends State<GalleryWidget> {
                                   child: AnimatedOpacity(
                                     opacity: 1 - opacity,
                                     duration: const Duration(milliseconds: 5),
-                                    child: Row(
-                                      children: <Widget>[
-                                        IgnorePointer(
-                                          ignoring: ignoringCloseButton,
-                                          child: BackButton(
+                                    child: IgnorePointer(
+                                      ignoring: ignoringHeaderButtons,
+                                      child: Row(
+                                        children: <Widget>[
+                                          BackButton(
                                             onPressed: () {
                                               closeGalleryWithAnimation();
                                             },
                                           ),
-                                        ),
-                                        if (!state.isLoading)
-                                          SizedBox(
-                                            width: widget.size.width - 50,
-                                            child: DropdownButton(
-                                              isDense: false,
-                                              isExpanded: true,
-                                              value: state.galleryAlbums.albums[state.selectedAlbumIndex],
-                                              items: state.galleryAlbums.albums
-                                                  .map<DropdownMenuItem<GalleryAlbum>>(
-                                                    (GalleryAlbum album) => DropdownMenuItem<GalleryAlbum>(
-                                                      value: album,
-                                                      child: Text(
-                                                        album.assetPathEntity == null
-                                                            ? 'All'
-                                                            : album.assetPathEntity!.name,
+                                          if (!state.isLoading)
+                                            SizedBox(
+                                              width: widget.size.width - 50,
+                                              child: DropdownButton(
+                                                isDense: false,
+                                                isExpanded: true,
+                                                value: state.galleryAlbums.albums[state.selectedAlbumIndex],
+                                                items: state.galleryAlbums.albums
+                                                    .map<DropdownMenuItem<GalleryAlbum>>(
+                                                      (GalleryAlbum album) => DropdownMenuItem<GalleryAlbum>(
+                                                        value: album,
+                                                        child: Text(
+                                                          album.assetPathEntity == null
+                                                              ? 'All'
+                                                              : album.assetPathEntity!.name,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  )
-                                                  .toList(),
-                                              onChanged: (GalleryAlbum? album) {
-                                                if (album != null) {
-                                                  BlocProvider.of<GalleryCubit>(context).loadAlbum(
-                                                    albumId: album.assetPathEntity != null
-                                                        ? album.assetPathEntity!.id
-                                                        : null,
-                                                  );
-                                                }
-                                              },
+                                                    )
+                                                    .toList(),
+                                                onChanged: (GalleryAlbum? album) {
+                                                  if (album != null) {
+                                                    widget.scrollController.jumpTo(widget.height);
+                                                    BlocProvider.of<GalleryCubit>(context).loadAlbum(
+                                                      albumId: album.assetPathEntity != null
+                                                          ? album.assetPathEntity!.id
+                                                          : null,
+                                                    );
+                                                  }
+                                                },
+                                              ),
                                             ),
-                                          ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -274,7 +256,7 @@ class _GalleryState extends State<GalleryWidget> {
                                     duration: const Duration(milliseconds: 5),
                                     child: Container(
                                       width: 30,
-                                      height: 5,
+                                      height: 3,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                                         borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -311,23 +293,49 @@ class _GalleryState extends State<GalleryWidget> {
                                                 state.galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles!
                                                         .length -
                                                     1
-                                        ? InkWell(
-                                            onTap: () {
-                                              getIt<TensorCubit>().setPicture(state.galleryAlbums
-                                                  .albums[state.selectedAlbumIndex].entitiesFiles![index]);
+                                        ? Stack(
+                                            children: <Widget>[
+                                              Positioned.fill(
+                                                child: Image.file(
+                                                  state.galleryAlbums.albums[state.selectedAlbumIndex]
+                                                      .entitiesFiles![index],
+                                                  cacheWidth: widget.size.width ~/ 3,
+                                                  fit: BoxFit.cover,
+                                                  frameBuilder: (BuildContext context, Widget child, int? frame,
+                                                      bool wasSynchronouslyLoaded) {
+                                                    if (wasSynchronouslyLoaded) {
+                                                      return child;
+                                                    }
+                                                    return AnimatedOpacity(
+                                                      opacity: frame == null ? 0 : 1,
+                                                      duration: const Duration(milliseconds: 700),
+                                                      curve: Curves.easeInCubic,
+                                                      child: child,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    getIt<TensorCubit>().setPicture(state.galleryAlbums
+                                                        .albums[state.selectedAlbumIndex].entitiesFiles![index]);
 
-                                              Navigator.push(
-                                                context,
-                                                buildRoute(const ColorsDetectedScreen()),
-                                              );
-                                              closeGalleryWithAnimation();
-                                            },
-                                            child: Image.file(
-                                              state
-                                                  .galleryAlbums.albums[state.selectedAlbumIndex].entitiesFiles![index],
-                                              cacheWidth: widget.size.width ~/ 3,
-                                              fit: BoxFit.cover,
-                                            ),
+                                                    Navigator.push(
+                                                      context,
+                                                      buildRoute(const ColorsDetectedScreen()),
+                                                    );
+                                                    closeGalleryWithAnimation();
+                                                  },
+                                                  child: Container(
+                                                    width: widget.size.width / 3 - spacing,
+                                                    height: widget.size.width / 3 - spacing,
+                                                    color: Colors.transparent,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           )
                                         : SizedBox(
                                             width: widget.size.width / 3,

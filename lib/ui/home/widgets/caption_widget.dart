@@ -33,21 +33,43 @@ class _CaptionState extends State<CaptionWidget> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        return Opacity(
-          opacity: _controller.value,
-          child: ClipPath(
-            clipper: CaptionClipper(),
-            child: const SizedBox(
-              width: 284.4,
-              height: 34,
-              child: GradientWidget(),
-            ),
+    return Tooltip(
+      message: 'Determine your colors by taking a photo or by simply selecting from the device',
+      verticalOffset: 40,
+      height: 25,
+      triggerMode: TooltipTriggerMode.tap,
+      textAlign: TextAlign.center,
+      textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+            color: Theme.of(context).colorScheme.onTertiaryContainer,
           ),
-        );
-      },
+      showDuration: const Duration(seconds: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.tertiaryContainer,
+        borderRadius: const BorderRadius.all(Radius.circular(25)),
+      ),
+      child: Container(
+        width: 284.4,
+        height: 34,
+        color: Colors.transparent,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (BuildContext context, Widget? child) {
+            return Opacity(
+              opacity: _controller.value,
+              child: ClipPath(
+                clipper: CaptionClipper(),
+                child: const SizedBox(
+                  width: 284.4,
+                  height: 34,
+                  child: GradientWidget(),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

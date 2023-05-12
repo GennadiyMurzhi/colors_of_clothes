@@ -13,7 +13,6 @@ class ColorsDetectedScreen extends StatelessWidget {
         shadowColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         leading: BackButton(
-          color: Colors.black,
           onPressed: () {
             Navigator.maybePop(context);
           },

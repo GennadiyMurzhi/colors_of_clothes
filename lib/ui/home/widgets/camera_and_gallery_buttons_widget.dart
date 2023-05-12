@@ -1,16 +1,19 @@
 import 'package:colors_of_clothes/ui/home/widgets/button_widget.dart';
 import 'package:colors_of_clothes/ui/home/widgets/clippers.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:colors_of_clothes/ui/home/widgets/tap_area_big_button_widget.dart';
+import 'package:flutter/material.dart';
 
 class CameraAndGalleryButtonsWidget extends StatefulWidget {
   const CameraAndGalleryButtonsWidget({
     super.key,
     required this.onTapCameraButton,
+    required this.buttonPadding,
     required this.onTapGalleryButton,
     required this.buttonSize,
   });
 
   final double buttonSize;
+  final EdgeInsets buttonPadding;
   final void Function() onTapCameraButton;
   final void Function() onTapGalleryButton;
 
@@ -55,6 +58,8 @@ class _CameraAndGalleryButtonsState extends State<CameraAndGalleryButtonsWidget>
 
   @override
   Widget build(BuildContext context) {
+    final tapAreaButtonWidth = MediaQuery.of(context).size.width / 2;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
@@ -64,16 +69,24 @@ class _CameraAndGalleryButtonsState extends State<CameraAndGalleryButtonsWidget>
             offset: Offset(0, widget.buttonSize / 2 * (1 - _controller.value)),
             child: Row(
               children: <Widget>[
-                GradientButtonWidget(
-                  width: widget.buttonSize,
+                TapAreaBigButtonWidget(
                   onTap: widget.onTapCameraButton,
-                  clipper: CameraButtonClipper(),
+                  width: tapAreaButtonWidth,
+                  child: GradientButtonWidget(
+                    width: widget.buttonSize,
+                    onTap: widget.onTapCameraButton,
+                    padding: widget.buttonPadding,
+                    clipper: CameraButtonClipper(),
+                  ),
                 ),
-                const SizedBox(width: 50),
-                GradientButtonWidget(
-                  width: widget.buttonSize,
+                TapAreaBigButtonWidget(
                   onTap: widget.onTapGalleryButton,
-                  clipper: GalleryButtonClipper(),
+                  width: tapAreaButtonWidth,
+                  child: GradientButtonWidget(
+                    width: widget.buttonSize,
+                    onTap: widget.onTapGalleryButton,
+                    clipper: GalleryButtonClipper(),
+                  ),
                 ),
               ],
             ),

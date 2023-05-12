@@ -19,7 +19,10 @@ class FlashButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    const double stackHeight = 90;
+    const double iconSize = 35;
+
+    return GestureDetector(
       onTap: () async {
         if (setFlashMode != null) {
           await setFlashMode!();
@@ -35,12 +38,12 @@ class FlashButton extends StatelessWidget {
                   angle: orientationAngle(orientationAnimationValue),
                   alignment: Alignment.center,
                   child: SizedBox(
-                    width: 35,
-                    height: 45,
+                    width: iconSize,
+                    height: stackHeight,
                     child: Stack(
                       children: <Widget>[
                         Positioned(
-                          top: iconList.length == 1 ? 0 : -45 + flashButtonAnimationValue * 45,
+                          top: iconList.length == 1 ? 0 : -stackHeight + flashButtonAnimationValue * stackHeight,
                           child: Column(
                             verticalDirection: VerticalDirection.up,
                             children: List<Widget>.generate(
@@ -48,11 +51,12 @@ class FlashButton extends StatelessWidget {
                               (int index) => Opacity(
                                 opacity: index == 0 ? 1 - flashButtonAnimationValue : flashButtonAnimationValue,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
+                                  // [padding] is considered to be [(stackHeight - iconSize) / 2]
+                                  padding: const EdgeInsets.symmetric(vertical: 27.5),
                                   child: Icon(
                                     iconList[index],
                                     color: Colors.white,
-                                    size: 35,
+                                    size: iconSize,
                                   ),
                                 ),
                               ),
@@ -65,7 +69,7 @@ class FlashButton extends StatelessWidget {
                 );
               },
             )
-          : const SizedBox(width: 35),
+          : const SizedBox(width: iconSize),
     );
   }
 }

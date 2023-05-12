@@ -41,21 +41,3 @@ Matrix4 createSwitchRotationMatrix(double animationValue) {
 }
 
 double orientationAngle(double animationValue) => -pi / 2 + pi * animationValue;
-
-Duration calculateScrollTime({
-  required double distance,
-  required double velocity,
-}) {
-  final int milliseconds;
-  final double time = distance / velocity;
-  if (!time.isInfinite && !time.isNaN) {
-    final int seconds = time.truncate();
-    milliseconds = (seconds * 1000 + ((time - seconds) * 1000).truncate()).abs();
-  } else {
-    milliseconds = 500;
-  }
-
-  return Duration(
-    milliseconds: milliseconds > 500 ? milliseconds : 500,
-  );
-}
