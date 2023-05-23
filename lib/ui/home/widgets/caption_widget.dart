@@ -47,7 +47,7 @@ class _CaptionState extends State<CaptionWidget> with TickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 15),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.tertiaryContainer,
-        borderRadius: const BorderRadius.all(Radius.circular(25)),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
       ),
       child: Container(
         width: 284.4,

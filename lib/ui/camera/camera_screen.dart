@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
+import 'package:colors_of_clothes/system.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_body.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
-import 'package:colors_of_clothes/system.dart';
-import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,12 +22,10 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
-  late CameraController cameraController;
   late AnimationController flashButtonAnimationController;
-  late AnimationController cameraButtonAnimationController;
   late AnimationController switchAnimationController;
   late AnimationController orientationAnimationController;
-  bool controllerIsInitialized = false;
+  late AnimationController opacityImageToRotateAnimationController;
 
   @override
   void initState() {
@@ -41,37 +37,21 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
       DeviceOrientation.portraitUp,
     ]);
 
-
-
-    cameraController = createController(cameras[0]);
-
-    cameraController.initialize().then(
-      (value) {
-        if (!mounted) {
-          return;
-        }
-
-        controllerIsInitialized = true;
-
-        WidgetsBinding.instance.addObserver(this);
-
-        setState(() {});
-      },
-    );
+    WidgetsBinding.instance.addObserver(this);
 
     flashButtonAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
 
-    cameraButtonAnimationController = AnimationController(
+    switchAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
-    switchAnimationController = AnimationController(
+    opacityImageToRotateAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 250),
     );
 
     orientationAnimationController = AnimationController(
@@ -80,10 +60,25 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     )..value = 0.5;
 
     NativeDeviceOrientationCommunicator().resume();
-
+    NativeDeviceOrientationCommunicator().orientation().then((NativeDeviceOrientation orientation) {
+      switch (orientation) {
+        case NativeDeviceOrientation.portraitDown:
+          break;
+        case NativeDeviceOrientation.unknown:
+          break;
+        case NativeDeviceOrientation.portraitUp:
+          break;
+        case NativeDeviceOrientation.landscapeLeft:
+          orientationAnimationController.animateTo(1, curve: Curves.easeIn);
+          break;
+        case NativeDeviceOrientation.landscapeRight:
+          orientationAnimationController.animateBack(0, curve: Curves.easeIn);
+          break;
+      }
+    });
     NativeDeviceOrientationCommunicator().onOrientationChanged(useSensor: true).listen(
-      (NativeDeviceOrientation event) {
-        switch (event) {
+      (NativeDeviceOrientation orientation) {
+        switch (orientation) {
           case NativeDeviceOrientation.portraitDown:
             break;
           case NativeDeviceOrientation.unknown:
@@ -110,9 +105,7 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
 
   @override
   void dispose() {
-    cameraController.dispose();
     flashButtonAnimationController.dispose();
-    cameraButtonAnimationController.dispose();
     switchAnimationController.dispose();
     orientationAnimationController.dispose();
 
@@ -161,65 +154,63 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
     setDefaultOrientation();
   }
 
-  Future<void> precacheCapturePreview(Uint8List capturePreview) async {
+  Future<void> precachePreview(Uint8List capturePreview) async {
     if (context.mounted) {
       await precacheImage(MemoryImage(capturePreview), context);
     }
   }
 
-  void setCameraControllerAndIsInitialized(CameraController cameraController, bool isInitialized) {
-    this.cameraController = cameraController;
-    controllerIsInitialized = isInitialized;
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (!cameraController.value.isInitialized) {
-      return Container();
-    }
-
-    final Size previewSize = cameraController.value.previewSize!;
-    final double previewHeight = MediaQuery.of(context).size.height;
-    final double previewWidth = previewHeight * previewSize.height / previewSize.width;
-
     return WillPopScope(
       onWillPop: onWillPop,
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        extendBody: true,
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: BackButton(
-            onPressed: backButtonOnPressed,
+      child: BlocProvider<CameraCubit>(
+        create: (BuildContext context) => getIt<CameraCubit>()
+          ..init(
+            deviceSize: MediaQuery.of(this.context).size,
+            precachePreview: precachePreview,
+            resetSwitchButtonAnimation: switchAnimationController.reset,
+            animateToOpacityImageToRotateAnimation:
+            opacityImageToRotateAnimationController.animateTo,
+            resetToOpacityImageToRotateAnimation: opacityImageToRotateAnimationController.reset,
           ),
-        ),
-        body: BlocProvider<CameraCubit>(
-          create: (context) => getIt<CameraCubit>()..setFlashIconOnInit(cameraController.value.flashMode),
-          child: BlocBuilder<CameraCubit, CameraState>(
-            builder: (BuildContext context, CameraState state) {
-              return CameraBody(
-                previewWidth: previewWidth,
-                previewHeight: previewHeight,
-                isEnabledSwitchButton: state.isEnabledSwitchButton,
-                controllerIsInitialized: controllerIsInitialized,
-                switchAnimationController: switchAnimationController,
-                capturePreview: state.capturePreview,
-                cameraController: cameraController,
-                orientationAnimationController: orientationAnimationController,
-                isCameraNotSwitched: state.isCameraNotSwitched,
-                flashButtonAnimationController: flashButtonAnimationController,
-                cameraButtonAnimationController: cameraButtonAnimationController,
-                flashIconList: state.flashIconList,
-                isEnabledFlashButton: state.isEnabledFlashButton,
-                pushColorsDetected: pushColorsDetected,
-                isSwitchButtonRotated: state.isSwitchButtonRotated,
-                precacheCapturePreview: precacheCapturePreview,
-                setCameraControllerAndIsInitialized: setCameraControllerAndIsInitialized,
+        child: BlocBuilder<CameraCubit, CameraState>(
+          builder: (BuildContext context, CameraState state) {
+            if (state.isInit) {
+              return Scaffold(
+                extendBodyBehindAppBar: true,
+                extendBody: true,
+                backgroundColor: Colors.black,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  leading: BackButton(
+                    onPressed: backButtonOnPressed,
+                  ),
+                ),
+                body: CameraBody(
+                  previewSize: state.previewSize,
+                  switchAnimationController: switchAnimationController,
+                  orientationAnimationController: orientationAnimationController,
+                  isCameraNotSwitched: state.isCameraNotSwitched,
+                  flashButtonAnimationController: flashButtonAnimationController,
+                  flashIconList: state.flashIconList,
+                  pushColorsDetected: pushColorsDetected,
+                  isSwitchButtonRotated: state.isSwitchButtonRotated,
+                  precachePreview: precachePreview,
+                  isDisplayPreview: state.isDisplayPreview,
+                  isDisplayImageToRotate: state.isDisplayImageToRotate,
+                  imageToRotate: state.imageToRotate,
+                  imageStream: BlocProvider.of<CameraCubit>(context).imageStream,
+                  needBlur: state.needBlur,
+                  opacityImageToRotateAnimationController: opacityImageToRotateAnimationController,
+                  isEnabledButtons: state.isEnabledButtons,
+                ),
               );
-            },
-          ),
+            } else {
+              return const SizedBox();
+            }
+          },
         ),
       ),
     );

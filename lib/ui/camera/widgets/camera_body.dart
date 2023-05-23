@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
 import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_button.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/flash_button.dart';
@@ -13,55 +12,55 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CameraBody extends StatelessWidget {
   const CameraBody({
     super.key,
-    required this.previewWidth,
-    required this.previewHeight,
-    required this.isEnabledSwitchButton,
-    required this.controllerIsInitialized,
-    required this.capturePreview,
+    required this.previewSize,
     required this.orientationAnimationController,
     required this.isCameraNotSwitched,
     required this.flashButtonAnimationController,
-    required this.cameraButtonAnimationController,
     required this.flashIconList,
-    required this.isEnabledFlashButton,
-    required this.cameraController,
     required this.pushColorsDetected,
     required this.isSwitchButtonRotated,
     required this.switchAnimationController,
-    required this.precacheCapturePreview,
-    required this.setCameraControllerAndIsInitialized,
+    required this.precachePreview,
+    required this.imageToRotate,
+    required this.isDisplayPreview,
+    required this.isDisplayImageToRotate,
+    required this.isEnabledButtons,
+    required this.imageStream,
+    required this.opacityImageToRotateAnimationController,
+    required this.needBlur,
   });
 
-  final double previewWidth;
-  final double previewHeight;
-  final bool isEnabledSwitchButton;
-  final bool controllerIsInitialized;
-  final Uint8List? capturePreview;
+  final Size previewSize;
   final AnimationController orientationAnimationController;
   final bool isCameraNotSwitched;
   final AnimationController flashButtonAnimationController;
-  final AnimationController cameraButtonAnimationController;
   final List<IconData> flashIconList;
-  final bool isEnabledFlashButton;
-  final CameraController cameraController;
   final void Function(File) pushColorsDetected;
   final bool isSwitchButtonRotated;
+  final bool isDisplayPreview;
+  final bool isDisplayImageToRotate;
+  final bool isEnabledButtons;
+  final bool needBlur;
   final AnimationController switchAnimationController;
-  final Future<void> Function(Uint8List) precacheCapturePreview;
-  final void Function(CameraController, bool) setCameraControllerAndIsInitialized;
+  final AnimationController opacityImageToRotateAnimationController;
+  final Future<void> Function(Uint8List) precachePreview;
+  final Uint8List? imageToRotate;
+  final Stream<Uint8List> imageStream;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         PreviewWidget(
-          previewWidth: previewWidth,
-          previewHeight: previewHeight,
-          isEnabledSwitchButton: isEnabledSwitchButton,
-          controllerIsInitialized: controllerIsInitialized,
+          needBlur: needBlur,
+          previewSize: previewSize,
           switchAnimationController: switchAnimationController,
-          capturePreview: capturePreview,
-          cameraController: cameraController,
+          imageToRotate: imageToRotate,
+          isCameraNotSwitched: isCameraNotSwitched,
+          isDisplayPreview: isDisplayPreview,
+          isDisplayImageToRotate: isDisplayImageToRotate,
+          imageStream: imageStream,
+          opacityImageToRotateAnimationController: opacityImageToRotateAnimationController,
         ),
         Positioned(
           bottom: 80,
@@ -77,10 +76,8 @@ class CameraBody extends StatelessWidget {
                     FlashButton(
                       isCameraNotSwitched: isCameraNotSwitched,
                       flashButtonAnimationController: flashButtonAnimationController,
-                      setFlashMode: isEnabledFlashButton
+                      setFlashMode: isEnabledButtons
                           ? () async => await BlocProvider.of<CameraCubit>(context).setFlashModeAndIcon(
-                                flashMode: cameraController.value.flashMode,
-                                setFlashMode: cameraController.setFlashMode,
                                 animateToFlashButtonAnimation: flashButtonAnimationController.animateTo,
                                 resetFlashButtonAnimation: flashButtonAnimationController.reset,
                               )
@@ -89,25 +86,21 @@ class CameraBody extends StatelessWidget {
                       orientationAnimationValue: orientationAnimationController.value,
                     ),
                     CameraButton(
-                      cameraButtonAnimationController: cameraButtonAnimationController,
-                      orientationAnimationValue: orientationAnimationController.value,
-                      onTap: () => BlocProvider.of<CameraCubit>(context).cameraButtonOnTap(
-                        takePicture: cameraController.takePicture,
-                        animateToCameraButtonAnimation: cameraButtonAnimationController.animateTo,
-                        animateBackCameraButtonAnimation: cameraButtonAnimationController.animateBack,
-                        pushColorsDetected: pushColorsDetected,
-                      ),
+                      onTap: isEnabledButtons
+                          ? () => BlocProvider.of<CameraCubit>(context).cameraButtonOnTap(
+                                pushColorsDetected: pushColorsDetected,
+                              )
+                          : null,
                     ),
                     SwitchCameraButton(
-                      onTap: () async {
-                        BlocProvider.of<CameraCubit>(context).switchCameraButtonOnTap(
-                          cameraController: cameraController,
-                          precacheCapturePreview: precacheCapturePreview,
-                          animateToCameraButtonAnimation: switchAnimationController.animateTo,
-                          resetCameraButtonAnimation: switchAnimationController.reset,
-                          setCameraControllerAndIsInitialized: setCameraControllerAndIsInitialized,
-                        );
-                      },
+                      onTap: isEnabledButtons
+                          ? () {
+                              BlocProvider.of<CameraCubit>(context).switchCameraButtonOnTap(
+                                animateToSwitchButtonAnimation: switchAnimationController.animateTo,
+                                precachePreview: precachePreview,
+                              );
+                            }
+                          : null,
                       switchAnimationController: switchAnimationController,
                       isSwitchButtonRotated: isSwitchButtonRotated,
                       orientationAnimationValue: orientationAnimationController.value,

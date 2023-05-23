@@ -129,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin i
                   if (galleryAnimationController.value != 0)
                     BackdropFilter(
                       filter: ImageFilter.blur(
-                        sigmaX: 3 * galleryAnimationController.value,
-                        sigmaY: 3 * galleryAnimationController.value,
+                        sigmaX: 2 * galleryAnimationController.value,
+                        sigmaY: 2 * galleryAnimationController.value,
                       ),
                       child: SizedBox.fromSize(
                         size: MediaQuery.of(context).size,

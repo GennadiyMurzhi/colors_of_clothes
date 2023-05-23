@@ -10,12 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  camera: 0.10.4
+  camera: 0.10.5
   tflite:
     path: D:/_work/colors_of_clothes/tflite/flutter_tflite-master/flutter_tflite-master
   get_it: 7.2.0
   native_device_orientation: 1.1.4
-  image: 4.0.15
+  image: 4.0.17
   palette_generator: 0.3.3+2
   flutter_bloc: 8.1.2
   bloc_concurrency: 0.2.1
@@ -25,6 +25,7 @@ dependencies:
   freezed_annotation: 2.2.0
   injectable: 2.1.1
   animate_gradient: 0.0.2
+  rxdart: 0.27.7
 
 
   cupertino_icons: ^1.0.2
@@ -42,16 +43,23 @@ flutter:
 
   uses-material-design: true
 
+
+
   assets:
     - assets/labels.txt
     - assets/model_unquant.tflite
 
+  fonts:
+    - family: ColorsOfClothesCustomIcons
+      fonts:
+        - asset: assets/icons/ColorsOfClothesCustomIcons.ttf
+
 flutter_native_splash:
-  color: "#fce3e4"
+  color: "#FBFCFD"
   image: assets/images/icon.png
-  color_dark: "#ec99a9"
+  color_dark: "#191C1D"
 
   android_12:
     image: assets/images/icon.png
-    icon_background_color: "#fce3e4"
-    icon_background_color_dark: "#ec99a9"
+    icon_background_color: "#FBFCFD"
+    icon_background_color_dark: "#191C1D"

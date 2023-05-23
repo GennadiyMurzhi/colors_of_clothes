@@ -1,9 +1,9 @@
 import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/domen/gallery_album.dart';
-import 'package:colors_of_clothes/domen/ui_utils.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/ui/colors_detected/colors_detected_screen.dart';
+import 'package:colors_of_clothes/ui/home/widgets/scrollbar_disappearing.dart';
 import 'package:colors_of_clothes/ui/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,13 +30,14 @@ class GalleryWidget extends StatefulWidget {
 class _GalleryState extends State<GalleryWidget> {
   final double startHeaderHeight = 30;
   late double headerHeight;
-  final double spacing = 6;
+  final double spacing = 3;
   final double backButtonWidth = 50;
   double radius = 15;
   double opacity = 1;
-  bool isClosingByEmptySliver = false;
+  bool isClosing = false;
   bool ignoringHeaderButtons = true;
   bool isCustomEndPositionScrolling = false;
+  bool isNeededScrollbar = false;
 
   @override
   void initState() {
@@ -46,14 +47,14 @@ class _GalleryState extends State<GalleryWidget> {
   }
 
   Future<void> closeGalleryWithAnimation() async {
-    isClosingByEmptySliver = true;
+    isClosing = true;
     await widget.galleryAnimationController.animateBack(
       0,
-      curve: Curves.linear,
-      duration: const Duration(milliseconds: 500),
+      curve: Curves.ease,
+      duration: const Duration(milliseconds: 300),
     );
     widget.scrollController.jumpTo(0);
-    isClosingByEmptySliver = false;
+    isClosing = false;
   }
 
   // onNotification
@@ -109,7 +110,17 @@ class _GalleryState extends State<GalleryWidget> {
 
   void changeHeaderOnScroll(ScrollNotification notification) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (notification.metrics.pixels >= widget.height * 0.9 && notification.metrics.pixels <= widget.height) {
+      if (notification is ScrollEndNotification &&
+          notification.metrics.pixels >= widget.height * 0.9 &&
+          notification.metrics.pixels <= widget.height) {
+        ignoringHeaderButtons = false;
+        widget.scrollController
+            .animateTo(
+              widget.height,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+            );
+      } else if (notification.metrics.pixels >= widget.height * 0.9 && notification.metrics.pixels <= widget.height) {
         final double deleteIndex = (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
         final double headerIndex = 2 - (1 - (notification.metrics.pixels / (widget.height / 100) / 100)) * 10;
         setState(() {
@@ -122,10 +133,23 @@ class _GalleryState extends State<GalleryWidget> {
   }
 
   void changeIgnoringCloseButton(ScrollNotification notification) {
-    if (notification.metrics.pixels >= widget.height * 0.95 && ignoringHeaderButtons != false) {
+    if (notification.metrics.pixels >= widget.height && ignoringHeaderButtons != false) {
       ignoringHeaderButtons = false;
-    } else if (notification.metrics.pixels <= widget.height * 0.95 && ignoringHeaderButtons != true) {
+    } else if (notification.metrics.pixels <= widget.height && ignoringHeaderButtons != true) {
       ignoringHeaderButtons = true;
+    }
+  }
+
+  void changeScrollbar(ScrollNotification notification) {
+    if (notification.metrics.pixels >= widget.height && !isNeededScrollbar) {
+      setState(() {
+        isNeededScrollbar = true;
+      });
+    }
+    if (notification.metrics.pixels <= widget.height && isNeededScrollbar) {
+      setState(() {
+        isNeededScrollbar = false;
+      });
     }
   }
 
@@ -147,13 +171,16 @@ class _GalleryState extends State<GalleryWidget> {
             changeHeaderIfExpanded(notification);
             changeHeaderOnScroll(notification);
             changeIgnoringCloseButton(notification);
+            changeScrollbar(notification);
+
             closeGallery(notification);
 
             return true;
           },
           child: ScrollConfiguration(
             behavior: DeleteGlowBehavior(),
-            child: Scrollbar(
+            child: ScrollbarDisappearing(
+              isNeeded: isNeededScrollbar,
               child: BlocBuilder<GalleryCubit, GalleryState>(
                 builder: (BuildContext context, GalleryState state) {
                   final double childrenHeight;
