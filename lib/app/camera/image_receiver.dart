@@ -15,8 +15,6 @@ class ImageReceiver {
   ///Stream through which updated data will arrive
   final BehaviorSubject<Uint8List> _imageStream;
 
-  late final StreamSubscription<Uint8List>? _subscription;
-
   ///add new data in stream
   Future<void> addImage(Uint8List image) async {
     _imageStream.add(_image = image);

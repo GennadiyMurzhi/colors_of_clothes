@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
+import 'package:colors_of_clothes/app/camera/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/camera_button.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/flash_button.dart';
 import 'package:colors_of_clothes/ui/camera/widgets/preview_widget.dart';

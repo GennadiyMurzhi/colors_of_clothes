@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:colors_of_clothes/app/camera_cubit/camera_cubit.dart';
+import 'package:colors_of_clothes/app/camera/camera_cubit/camera_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/injection.dart';
 import 'package:colors_of_clothes/system.dart';

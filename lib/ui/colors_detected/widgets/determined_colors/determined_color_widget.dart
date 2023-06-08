@@ -1,3 +1,4 @@
+import 'package:colors_of_clothes/ui/colors_detected/widgets/determined_colors/color_info_widget.dart';
 import 'package:flutter/material.dart';
 
 class DeterminedColorWidget extends StatelessWidget {
@@ -8,6 +9,7 @@ class DeterminedColorWidget extends StatelessWidget {
     required this.color,
     required this.isSelected,
     required this.compatible,
+    required this.isDisplayingInfo,
   });
 
   final void Function() selectPixel;
@@ -15,6 +17,7 @@ class DeterminedColorWidget extends StatelessWidget {
   final Color color;
   final bool isSelected;
   final bool compatible;
+  final bool isDisplayingInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -39,25 +42,12 @@ class DeterminedColorWidget extends StatelessWidget {
                     : null,
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              color.toString(),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: color,
-                    fontWeight: isSelected ? FontWeight.w600 : null,
-                  ),
-            ),
-            const SizedBox(height: 5),
-            compatible
-                ? Icon(
-                    Icons.check_box_outlined,
-                    color: Colors.green.shade500,
-                  )
-                : Icon(
-                    Icons.indeterminate_check_box_outlined,
-                    color: Colors.red.shade900,
-                  ),
+            if (isDisplayingInfo)
+              ColorInfoWidget(
+                color: color,
+                isSelected: isSelected,
+                compatible: compatible,
+              ),
           ],
         ),
       ),

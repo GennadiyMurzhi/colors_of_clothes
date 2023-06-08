@@ -1,3 +1,5 @@
+import 'package:colors_of_clothes/app/connector_tensor_cubit_colors_detected/connector_tensor_colors_detected.dart';
+import 'package:colors_of_clothes/app/connector_tensor_cubit_colors_detected/connector_tensor_colors_detected_event.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +11,32 @@ part 'colors_detected_state.dart';
 
 @Injectable()
 class ColorsDetectedCubit extends Cubit<ColorsDetectedState> {
-  ColorsDetectedCubit() : super(ColorsDetectedState.initial());
+  ColorsDetectedCubit(this._connectorTensorColorsDetected) : super(ColorsDetectedState.colorDetermination()) {
+    _connectorTensorColorsDetected.addListener(
+      (ConnectorTensorColorsDetectedEvent event) {
+        //TODO
+        event.maybeWhen(
+          colorsNotDetermined: () {
+            emit(
+              state.copyWith(
+                isColorDetermination: false,
+              ),
+            );
+          },
+          colorsDeterminedAnimateIsEnded: () {
+            emit(
+              state.copyWith(
+                isColorDetermination: false,
+              ),
+            );
+          },
+          orElse: () {},
+        );
+      },
+    );
+  }
+
+  final ConnectorTensorColorsDetected _connectorTensorColorsDetected;
 
   void selectPixel(int indexPixel) {
     emit(
@@ -17,5 +44,12 @@ class ColorsDetectedCubit extends Cubit<ColorsDetectedState> {
         selectedPixelIndex: indexPixel,
       ),
     );
+  }
+
+  @override
+  Future<void> close() async {
+    await _connectorTensorColorsDetected.clear();
+
+    super.close();
   }
 }

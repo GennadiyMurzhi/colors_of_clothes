@@ -346,8 +346,10 @@ class _GalleryState extends State<GalleryWidget> {
                                                 color: Colors.transparent,
                                                 child: InkWell(
                                                   onTap: () {
-                                                    getIt<TensorCubit>().setPicture(state.galleryAlbums
-                                                        .albums[state.selectedAlbumIndex].entitiesFiles![index]);
+                                                    //TODO: delete and uncomment
+                                                    //getIt<TensorCubit>().testLoadingAnimation();
+                                                     getIt<TensorCubit>().setPicture(state.galleryAlbums
+                                                         .albums[state.selectedAlbumIndex].entitiesFiles![index]);
 
                                                     Navigator.push(
                                                       context,

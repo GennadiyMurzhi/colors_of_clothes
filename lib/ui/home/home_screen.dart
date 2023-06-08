@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
+import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/ui/camera/camera_screen.dart';
 import 'package:colors_of_clothes/ui/home/widgets/button_widget.dart';
 import 'package:colors_of_clothes/ui/home/widgets/camera_and_gallery_buttons_widget.dart';
@@ -25,6 +26,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin i
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      routeObserver.subscribe(this, ModalRoute.of(context)!);
+    });
+
     galleryAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -49,9 +54,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin i
   }
 
   @override
-  void didPopNext() {
-    BlocProvider.of<TensorCubit>(context).setInitial();
-  }
+  void didPopNext() {}
 
   @override
   void didPush() {}

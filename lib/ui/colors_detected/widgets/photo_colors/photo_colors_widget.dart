@@ -14,6 +14,7 @@ class PhotoColorsWidget extends StatelessWidget {
     required this.pixelList,
     required this.selectedPixelIndex,
     required this.selectPixel,
+    required this.opacity,
   });
 
   final Uint8List image;
@@ -22,6 +23,7 @@ class PhotoColorsWidget extends StatelessWidget {
   final List<DeterminedPixel> pixelList;
   final int? selectedPixelIndex;
   final void Function(int index) selectPixel;
+  final double opacity;
 
   @override
   Widget build(BuildContext context) {
@@ -31,31 +33,34 @@ class PhotoColorsWidget extends StatelessWidget {
     const double selectedMarkSize = 35;
     const double circleBorder = 3;
 
-    return Stack(
-      children: <Widget>[
-        Image.memory(
-          image,
-          width: imageWidth / changeSizesIndex,
-          height: imageHeight / changeSizesIndex,
-        ),
-        ...List<Widget>.generate(
-          pixelList.length,
-          (int index) {
-            final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
+    return Opacity(
+      opacity: opacity,
+      child: Stack(
+        children: <Widget>[
+          Image.memory(
+            image,
+            width: imageWidth / changeSizesIndex,
+            height: imageHeight / changeSizesIndex,
+          ),
+          ...List<Widget>.generate(
+            pixelList.length,
+            (int index) {
+              final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
 
-            return ColorMarkWidget(
-              isSelected: isSelected,
-              determinedPixel: pixelList[index],
-              changeSizesIndex: changeSizesIndex,
-              markSize: markSize,
-              selectedMarkSize: selectedMarkSize,
-              circleBorder: circleBorder,
-              pixelIndex: index,
-              selectPixel: selectPixel,
-            );
-          },
-        ),
-      ],
+              return ColorMarkWidget(
+                isSelected: isSelected,
+                determinedPixel: pixelList[index],
+                changeSizesIndex: changeSizesIndex,
+                markSize: markSize,
+                selectedMarkSize: selectedMarkSize,
+                circleBorder: circleBorder,
+                pixelIndex: index,
+                selectPixel: selectPixel,
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

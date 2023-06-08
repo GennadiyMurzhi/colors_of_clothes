@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 
+import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/domen/determined_pixels.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:colors_of_clothes/injection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
@@ -29,78 +31,92 @@ class Tensor {
       throw ('not load model');
     }
   }
+}
 
-  Future<DeterminedPixels> selectPixels(File image) async {
-    final Uint8List imageBits = image.readAsBytesSync();
-    final img.Image? decodedImage = img.decodeImage(imageBits);
-    if (decodedImage == null) {
-      throw ('no decode image in the predict segmentation');
+Future<void> selectPixels(IsolateTensorArgs args) async {
+  final RootIsolateToken rootIsolateToken = args.rootIsolateToken;
+  final SendPort sendPort = args.sendPort;
+  final File setPictureFile = args.pictureFile;
+
+  BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
+
+  final DeterminedPixels determinedPixel = await _selectPixels(setPictureFile);
+
+  sendPort.send(determinedPixel);
+}
+
+Future<DeterminedPixels> _selectPixels(File image) async {
+  final Uint8List imageBits = image.readAsBytesSync();
+  final img.Image? decodedImage = img.decodeImage(imageBits);
+  if (decodedImage == null) {
+    throw ('no decode image in the predict segmentation');
+  }
+
+  Uint8List? segmentation = await Tflite.runSegmentationOnImage(path: image.path);
+  if (segmentation == null) {
+    throw ('no segmentation result');
+  }
+
+  final img.Image? decodedSegmentation = img.decodePng(segmentation);
+  if (decodedSegmentation == null) {
+    throw ('no decode result in the predict segmentation');
+  }
+  final img.Image resizedDecodedSegmentation = img.copyResize(
+    decodedSegmentation,
+    width: decodedImage.width,
+    height: decodedImage.height,
+  );
+
+  List<img.Pixel> segmentedPixels = <img.Pixel>[];
+  //the value of color for person: Color.fromARGB(255, 192, 128, 128)
+  for (img.Pixel pixel in resizedDecodedSegmentation) {
+    if (pixel.r == 192 || pixel.g == 128 || pixel.b == 128) {
+      segmentedPixels.add(decodedImage.getPixel(pixel.x, pixel.y));
     }
+  }
 
-    Uint8List? segmentation = await Tflite.runSegmentationOnImage(path: image.path);
-    if (segmentation == null) {
-      throw ('no segmentation result');
-    }
+  final img.Image personImage = img.Image(
+    width: decodedImage.width,
+    height: decodedImage.height,
+  )..clear(img.ColorRgba8(255, 255, 255, 1));
+  for (img.Pixel pixel in segmentedPixels) {
+    personImage.setPixel(pixel.x, pixel.y, pixel.clone());
+  }
 
-    final img.Image? decodedSegmentation = img.decodePng(segmentation);
-    if (decodedSegmentation == null) {
-      throw ('no decode result in the predict segmentation');
-    }
-    final img.Image resizedDecodedSegmentation = img.copyResize(
-      decodedSegmentation,
-      width: decodedImage.width,
-      height: decodedImage.height,
-    );
+  final EncodedImage encodedImage = EncodedImage(
+    personImage.buffer.asByteData(),
+    width: (personImage.buffer.asByteData().lengthInBytes ~/ 4) ~/ personImage.height,
+    height: personImage.height,
+  );
+  final PaletteGenerator palette = await PaletteGenerator.fromByteData(encodedImage);
 
-    List<img.Pixel> segmentedPixels = <img.Pixel>[];
-    //the value of color for person: Color.fromARGB(255, 192, 128, 128)
-    for (img.Pixel pixel in resizedDecodedSegmentation) {
-      if (pixel.r == 192 || pixel.g == 128 || pixel.b == 128) {
-        segmentedPixels.add(decodedImage.getPixel(pixel.x, pixel.y));
-      }
-    }
+  if (kDebugMode) {
+    print('\npalette.colors.length: ${palette.colors.length}');
+    print('\npalette.selectedSwatches.length: ${palette.selectedSwatches.length}\n ${palette.selectedSwatches}');
+    print('\npalette.paletteColors.length: ${palette.paletteColors.length}');
+  }
 
-    final img.Image personImage = img.Image(
-      width: decodedImage.width,
-      height: decodedImage.height,
-    )..clear(img.ColorRgb8(255, 255, 255));
-    for (img.Pixel pixel in segmentedPixels) {
-      personImage.setPixel(pixel.x, pixel.y, pixel.clone());
-    }
+  final List<Color> selectedSwatches = <Color>[];
 
-    final PaletteGenerator palette = await PaletteGenerator.fromImageProvider(
-      MemoryImage(
-        img.encodeJpg(personImage),
+  for (PaletteTarget swatch in palette.selectedSwatches.keys) {
+    selectedSwatches.add(palette.selectedSwatches[swatch]!.color);
+  }
+
+  List<DeterminedPixel> determinedPixels = <DeterminedPixel>[];
+  for (Color swatch in selectedSwatches) {
+    determinedPixels.add(
+      _searchSimilarPixel(
+        selectedSwatch: swatch,
+        pixels: segmentedPixels,
       ),
     );
-
-    if (kDebugMode) {
-      print('\npalette.colors.length: ${palette.colors.length}');
-      print('\npalette.selectedSwatches.length: ${palette.selectedSwatches.length}\n ${palette.selectedSwatches}');
-      print('\npalette.paletteColors.length: ${palette.paletteColors.length}');
-    }
-    final List<Color> selectedSwatches = <Color>[];
-
-    for (PaletteTarget swatch in palette.selectedSwatches.keys) {
-      selectedSwatches.add(palette.selectedSwatches[swatch]!.color);
-    }
-
-    List<DeterminedPixel> determinedPixels = <DeterminedPixel>[];
-    for (Color swatch in selectedSwatches) {
-      determinedPixels.add(
-        _searchSimilarPixel(
-          selectedSwatch: swatch,
-          pixels: segmentedPixels,
-        ),
-      );
-    }
-
-    return DeterminedPixels(
-      decodedImage.width.toDouble(),
-      decodedImage.height.toDouble(),
-      determinedPixels,
-    );
   }
+
+  return DeterminedPixels(
+    decodedImage.width.toDouble(),
+    decodedImage.height.toDouble(),
+    determinedPixels,
+  );
 }
 
 ///https://en.wikipedia.org/wiki/Color_difference
@@ -132,4 +148,16 @@ DeterminedPixel _searchSimilarPixel({
       1,
     ),
   );
+}
+
+class IsolateTensorArgs {
+  const IsolateTensorArgs({
+    required this.rootIsolateToken,
+    required this.sendPort,
+    required this.pictureFile,
+  });
+
+  final RootIsolateToken rootIsolateToken;
+  final SendPort sendPort;
+  final File pictureFile;
 }

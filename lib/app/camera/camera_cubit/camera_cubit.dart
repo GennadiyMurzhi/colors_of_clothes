@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:colors_of_clothes/app/image_receiver.dart';
+import 'package:colors_of_clothes/app/camera/image_receiver.dart';
 import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/ui/colors_of_clothes_custom_icons_icons.dart';
 import 'package:flutter/material.dart';
