@@ -17,18 +17,10 @@ class ColorsDetectedCubit extends Cubit<ColorsDetectedState> {
         //TODO
         event.maybeWhen(
           colorsNotDetermined: () {
-            emit(
-              state.copyWith(
-                isColorDetermination: false,
-              ),
-            );
+            _isColorsNotDeterminedEmit();
           },
           colorsDeterminedAnimateIsEnded: () {
-            emit(
-              state.copyWith(
-                isColorDetermination: false,
-              ),
-            );
+            _isColorsNotDeterminedEmit();
           },
           orElse: () {},
         );
@@ -42,6 +34,22 @@ class ColorsDetectedCubit extends Cubit<ColorsDetectedState> {
     emit(
       state.copyWith(
         selectedPixelIndex: indexPixel,
+      ),
+    );
+  }
+
+  void _isColorsNotDeterminedEmit() {
+    emit(
+      state.copyWith(
+        isColorDetermination: false,
+      ),
+    );
+  }
+
+  void switchExpanded(bool isSlidingUpColorsWidgetExpanded) {
+    emit(
+      state.copyWith(
+        isSlidingUpColorsWidgetExpanded: isSlidingUpColorsWidgetExpanded,
       ),
     );
   }

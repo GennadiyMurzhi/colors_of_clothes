@@ -6,9 +6,11 @@ class CompatibleColorsWidget extends StatelessWidget {
   const CompatibleColorsWidget({
     super.key,
     required this.compatibleColors,
+    required this.horizontalSymmetricPadding,
   });
 
   final CompatibleColors? compatibleColors;
+  final double horizontalSymmetricPadding;
 
   @override
   Widget build(BuildContext context) {

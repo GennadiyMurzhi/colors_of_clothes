@@ -1,5 +1,4 @@
 import 'package:colors_of_clothes/domen/compatible_colors.dart';
-import 'package:colors_of_clothes/domen/determined_pixels.dart';
 import 'package:colors_of_clothes/domen/ui_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -13,8 +12,11 @@ class DeterminedColorsWidget extends StatelessWidget {
     required this.selectPixel,
     required this.circleSize,
     required this.isDisplayingInfo,
-    required this.sideAnimationValue,
-    required this.downAnimationValue,
+    required this.sideAnimationFirstValue,
+    required this.sideAnimationSecondValue,
+    required this.circleBorderWidth,
+    required this.determinedColorsWidgetHeight,
+    required this.horizontalSymmetricPadding,
   });
 
   final List<CompatibleColors> compatibleDeterminedColors;
@@ -22,77 +24,73 @@ class DeterminedColorsWidget extends StatelessWidget {
   final void Function(int indexPixel) selectPixel;
   final double circleSize;
   final bool isDisplayingInfo;
-  final double sideAnimationValue;
-  final double downAnimationValue;
+  final double sideAnimationFirstValue;
+  final double sideAnimationSecondValue;
+  final double circleBorderWidth;
+  final double determinedColorsWidgetHeight;
+  final double horizontalSymmetricPadding;
 
   @override
   Widget build(BuildContext context) {
     final Size mediaSize = MediaQuery.of(context).size;
-    final double sizeWidth = mediaSize.width;
-    final double colorRowSymmetricPadding = circleSize / 2;
+    final double sizeWidth = mediaSize.width - horizontalSymmetricPadding * 2;
 
     final int compatibleDeterminedColorsLength = compatibleDeterminedColors.length;
-    final double translateCircle = (sizeWidth - colorRowSymmetricPadding) / compatibleDeterminedColorsLength * 2;
 
-    final bool isOddCountColors = compatibleDeterminedColorsLength % 2 == 0;
-    final int inHalfCount = compatibleDeterminedColorsLength ~/ 2;
+    const double padding = 10;
 
-    return Stack(
-      alignment: Alignment.center,
-      children: List.generate(
-        compatibleDeterminedColorsLength,
-        (int index) {
-          final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
+    final double circlesCountsWidth = circleSize * compatibleDeterminedColorsLength;
+    final double innerPaddingCount = padding * (compatibleDeterminedColorsLength - 1);
 
-          final int animationIndex = isOddCountColors
-              ? index < inHalfCount
-                  ? inHalfCount - index
-                  : index - inHalfCount + 1
-              : index < inHalfCount
-                  ? inHalfCount - index
-                  : index ~/ 2;
+    final double fullCirclesWidth = circlesCountsWidth + innerPaddingCount + horizontalSymmetricPadding * 2;
 
-          final double? animateTranslateCircle;
-          final bool? isInHalfCount;
-          if (!isOddCountColors) {
-            isInHalfCount = index == inHalfCount;
-          } else {
-            isInHalfCount = null;
-          }
+    final double translateCircle =
+        circleSize + (sizeWidth - circlesCountsWidth) / (compatibleDeterminedColorsLength - 1);
 
-          if (isOddCountColors && (index == inHalfCount - 1 || index == inHalfCount)) {
-            animateTranslateCircle = translateCircle / 2 * sideAnimationValue * animationIndex;
-          } else if (isOddCountColors) {
-            animateTranslateCircle = (translateCircle * animationIndex - translateCircle / 2) * sideAnimationValue;
-          } else if ((!isOddCountColors && !isInHalfCount!)) {
-            animateTranslateCircle = translateCircle * sideAnimationValue * animationIndex;
-          } else {
-            animateTranslateCircle = null;
-          }
+    final bool isBiggerCirclesCountsWidth = circlesCountsWidth >= sizeWidth;
 
-          return Positioned(
-            top: downAnimationValue,
-            child: Padding(
-              padding: isOddCountColors
-                  ? index < inHalfCount
-                      ? EdgeInsets.only(right: animateTranslateCircle!)
-                      : EdgeInsets.only(left: animateTranslateCircle!)
-                  : isInHalfCount!
-                      ? EdgeInsets.zero
-                      : index < inHalfCount
-                          ? EdgeInsets.only(right: animateTranslateCircle!)
-                          : EdgeInsets.only(left: animateTranslateCircle!),
-              child: DeterminedColorWidget(
-                selectPixel: () => selectPixel(index),
-                colorContainerSize: circleSize,
-                color: compatibleDeterminedColors[index].color,
-                isSelected: isSelected,
-                compatible: compatibleDeterminedColors[index].compatible,
-                isDisplayingInfo: isDisplayingInfo,
-              ),
+    return SizedBox(
+      width: mediaSize.width,
+      height: determinedColorsWidgetHeight * 2,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: isBiggerCirclesCountsWidth ? fullCirclesWidth : mediaSize.width,
+          height: determinedColorsWidgetHeight,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: List.generate(
+              compatibleDeterminedColorsLength,
+              (int index) {
+                final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
+
+                final double positionLeft = (sizeWidth - circleSize) / 2 * (1 - sideAnimationFirstValue) +
+                    (index != 0
+                        ? (index * translateCircle + horizontalSymmetricPadding) * sideAnimationFirstValue
+                        : horizontalSymmetricPadding) +
+                    (isBiggerCirclesCountsWidth && index != 0
+                        ? sideAnimationSecondValue *
+                            ((circlesCountsWidth - sizeWidth) / (compatibleDeterminedColorsLength - 1) + padding) *
+                            index
+                        : 0);
+
+                return Positioned(
+                  top: circleBorderWidth,
+                  left: positionLeft,
+                  child: DeterminedColorWidget(
+                    selectPixel: () => selectPixel(index),
+                    colorContainerSize: circleSize,
+                    color: compatibleDeterminedColors[index].color,
+                    isSelected: isSelected,
+                    compatible: compatibleDeterminedColors[index].compatible,
+                    isDisplayingInfo: isDisplayingInfo,
+                    circleBorderWidth: circleBorderWidth,
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

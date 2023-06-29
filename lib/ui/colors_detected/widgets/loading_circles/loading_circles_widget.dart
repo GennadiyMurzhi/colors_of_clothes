@@ -9,10 +9,12 @@ class LoadingCirclesWidget extends StatelessWidget {
     super.key,
     required this.loadingAnimationController,
     required this.circleSize,
+    required this.downAnimationValue,
   });
 
   final AnimationController loadingAnimationController;
   final double circleSize;
+  final double downAnimationValue;
 
   final List<Color> _colors = <Color>[
     darkColorScheme.primary,
@@ -23,7 +25,8 @@ class LoadingCirclesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final Size mediaSize = MediaQuery.of(context).size;
+    final double screenWidth = mediaSize.width;
     final double distanceTranslate = screenWidth / 3;
 
     final Animation<Offset> translateAnimation = TweenSequence<Offset>(
@@ -45,25 +48,28 @@ class LoadingCirclesWidget extends StatelessWidget {
       ],
     ).animate(loadingAnimationController);
 
-    return AnimatedBuilder(
-      animation: loadingAnimationController,
-      builder: (BuildContext context, Widget? widget) {
-        return Transform.rotate(
-          angle: ((3 / 4) * (2 * pi)) * loadingAnimationController.value + pi * 0.35,
-          child: Stack(
-            alignment: Alignment.center,
-            children: List.generate(
-              4,
-              (index) => CircleWidget(
-                circleSize: circleSize,
-                color: _colors[index],
-                offset: translateAnimation.value,
-                rotateIndex: index,
+    return Positioned(
+      top: downAnimationValue,
+      child: AnimatedBuilder(
+        animation: loadingAnimationController,
+        builder: (BuildContext context, Widget? widget) {
+          return Transform.rotate(
+            angle: ((3 / 4) * (2 * pi)) * loadingAnimationController.value + pi * 0.35,
+            child: Stack(
+              alignment: Alignment.center,
+              children: List.generate(
+                4,
+                (index) => CircleWidget(
+                  circleSize: circleSize,
+                  color: _colors[index],
+                  offset: translateAnimation.value,
+                  rotateIndex: index,
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

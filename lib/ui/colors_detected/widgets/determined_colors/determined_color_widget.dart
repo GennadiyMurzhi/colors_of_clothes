@@ -10,6 +10,7 @@ class DeterminedColorWidget extends StatelessWidget {
     required this.isSelected,
     required this.compatible,
     required this.isDisplayingInfo,
+    required this.circleBorderWidth,
   });
 
   final void Function() selectPixel;
@@ -18,6 +19,7 @@ class DeterminedColorWidget extends StatelessWidget {
   final bool isSelected;
   final bool compatible;
   final bool isDisplayingInfo;
+  final double circleBorderWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class DeterminedColorWidget extends StatelessWidget {
                 border: isSelected
                     ? Border.all(
                         color: color.withOpacity(0.5),
-                        width: 3,
+                        width: circleBorderWidth,
                         strokeAlign: BorderSide.strokeAlignOutside,
                       )
                     : null,

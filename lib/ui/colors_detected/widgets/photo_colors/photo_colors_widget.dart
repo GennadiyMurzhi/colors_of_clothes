@@ -27,39 +27,42 @@ class PhotoColorsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double changeSizesIndex = imageWidth / MediaQuery.of(context).size.width;
+    final Size mediaSize = MediaQuery.of(context).size;
+    final double changeSizesIndex = imageWidth / mediaSize.width;
 
     const double markSize = 30;
     const double selectedMarkSize = 35;
     const double circleBorder = 3;
 
-    return Opacity(
-      opacity: opacity,
-      child: Stack(
-        children: <Widget>[
-          Image.memory(
-            image,
-            width: imageWidth / changeSizesIndex,
-            height: imageHeight / changeSizesIndex,
-          ),
-          ...List<Widget>.generate(
-            pixelList.length,
-            (int index) {
-              final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
+    return Center(
+      child: Opacity(
+        opacity: opacity,
+        child: Stack(
+          children: <Widget>[
+            Image.memory(
+              image,
+              width: imageWidth / changeSizesIndex,
+              height: imageHeight / changeSizesIndex,
+            ),
+            ...List<Widget>.generate(
+              pixelList.length,
+              (int index) {
+                final bool isSelected = isSelectedPixel(index, selectedPixelIndex);
 
-              return ColorMarkWidget(
-                isSelected: isSelected,
-                determinedPixel: pixelList[index],
-                changeSizesIndex: changeSizesIndex,
-                markSize: markSize,
-                selectedMarkSize: selectedMarkSize,
-                circleBorder: circleBorder,
-                pixelIndex: index,
-                selectPixel: selectPixel,
-              );
-            },
-          ),
-        ],
+                return ColorMarkWidget(
+                  isSelected: isSelected,
+                  determinedPixel: pixelList[index],
+                  changeSizesIndex: changeSizesIndex,
+                  markSize: markSize,
+                  selectedMarkSize: selectedMarkSize,
+                  circleBorder: circleBorder,
+                  pixelIndex: index,
+                  selectPixel: selectPixel,
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

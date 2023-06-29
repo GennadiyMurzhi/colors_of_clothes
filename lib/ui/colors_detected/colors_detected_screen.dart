@@ -28,22 +28,26 @@ class _ColorsDetectedScreenState extends State<ColorsDetectedScreen> with Ticker
 
     _afterDeterminedAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
     );
 
-    _connectorTensorColorsDetected.addListener((ConnectorTensorColorsDetectedEvent event) {
-      event.maybeWhen(
-        colorsDetermined: () async {
-          await _loadingAnimationController.animateTo(1);
-          _loadingAnimationController.stop();
-          _connectorTensorColorsDetected.addEvent(ConnectorTensorColorsDetectedEvent.colorsDeterminedAnimateIsEnded());
-        },
-        colorsDeterminedAnimateIsEnded: () {
-          _afterDeterminedAnimationController.animateTo(1);
-        },
-        orElse: () {},
-      );
-    });
+    _connectorTensorColorsDetected.addListener(
+      (ConnectorTensorColorsDetectedEvent event) {
+        event.maybeWhen(
+          colorsDetermined: () async {
+            await _loadingAnimationController.animateTo(1);
+            _loadingAnimationController.stop();
+            await _afterDeterminedAnimationController.animateTo(0.6);
+            _connectorTensorColorsDetected
+                .addEvent(ConnectorTensorColorsDetectedEvent.colorsDeterminedAnimateIsEnded());
+          },
+          colorsDeterminedAnimateIsEnded: () {
+            _afterDeterminedAnimationController.animateTo(1);
+          },
+          orElse: () {},
+        );
+      },
+    );
 
     super.initState();
   }
@@ -59,15 +63,20 @@ class _ColorsDetectedScreenState extends State<ColorsDetectedScreen> with Ticker
   @override
   Widget build(BuildContext context) {
     final double circleSize = MediaQuery.of(context).size.width / 5;
+    const double appBarHeight = 70;
+    final double correctSlidingUpColorsWidget = appBarHeight + MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      appBar: AppBar(
-        shadowColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.maybePop(context);
-          },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(appBarHeight),
+        child: AppBar(
+          shadowColor: Colors.transparent,
+          backgroundColor: Colors.transparent,
+          leading: BackButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
       ),
       extendBodyBehindAppBar: true,
@@ -78,6 +87,8 @@ class _ColorsDetectedScreenState extends State<ColorsDetectedScreen> with Ticker
             child: BlocBuilder<ColorsDetectedCubit, ColorsDetectedState>(
               builder: (BuildContext context, ColorsDetectedState colorsDetectedState) {
                 return ColorsDetectedBody(
+                  isSlidingUpColorsWidgetExpanded: colorsDetectedState.isSlidingUpColorsWidgetExpanded,
+                  correctSlidingUpColorsWidget: correctSlidingUpColorsWidget,
                   circleSize: circleSize,
                   isColorDetermination: colorsDetectedState.isColorDetermination,
                   loadingAnimationController: _loadingAnimationController,

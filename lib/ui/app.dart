@@ -1,4 +1,3 @@
-import 'package:colors_of_clothes/app/gallery_cubit/gallery_cubit.dart';
 import 'package:colors_of_clothes/app/tensor_cubit/tensor_cubit.dart';
 import 'package:colors_of_clothes/global.dart';
 import 'package:colors_of_clothes/injection.dart';
@@ -12,16 +11,8 @@ class ColorsClothesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return MultiBlocProvider(
-      providers: <BlocProvider>[
-        BlocProvider<TensorCubit>(
-          create: (BuildContext context) => getIt<TensorCubit>(),
-        ),
-        BlocProvider<GalleryCubit>(
-          create: (BuildContext context) => getIt<GalleryCubit>()..init(),
-        ),
-      ],
+    return BlocProvider<TensorCubit>(
+      create: (BuildContext context) => getIt<TensorCubit>(),
       child: MaterialApp(
         navigatorObservers: [routeObserver],
         title: 'Colors of Clothes',
